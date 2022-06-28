@@ -1,24 +1,34 @@
-pub mod connect_url_options;
+pub mod options;
 
 use std::env;
 
+use self::options::GetAuthUrlOptions;
+
+use super::permission::Permission;
+
+const SMARTCAR_CONNECT_BASE_URL: &str = "https://connect.smartcar.com";
+
 pub struct AuthClient {
-    pub client_id: String,
-    pub client_secret: String,
-    pub redirect_uri: String,
-    pub test_mode: bool,
+    client_id: String,
+    client_secret: String,
+    redirect_uri: String,
+    test_mode: bool,
 }
 
 impl AuthClient {
+    /// # Create AuthClient from environment variables
     pub fn from_env(test_mode: bool) -> AuthClient {
         SmartcarCredentialsBuilder::new(test_mode).build()
     }
 
+    /// # Build AuthClient with SmartcarCredntialsBuilder
     pub fn setup(test_mode: bool) -> SmartcarCredentialsBuilder {
         SmartcarCredentialsBuilder::new(test_mode)
     }
 
-    // pub fn get_auth_url(scope: [Permission]) -> String {}
+    // pub fn get_auth_url(scope: Vec<Permission>, options: GetAuthUrlOptions) -> String {
+    //     String::from("")
+    // }
 
     // pub fn exchange_code(code: String) -> Access {}
 
@@ -93,13 +103,11 @@ fn auth_client_creation_with_builder() {
     let test_client_secret = "test-client-secret";
     let test_redirect_uri = "redirect-uri.com";
 
-    let mut auth_client = AuthClient::setup(false)
+    let auth_client = AuthClient::setup(false)
         .set_client_id(test_client_id)
         .set_client_secret(test_client_secret)
         .set_redirect_uri(test_redirect_uri)
         .build();
-
-    auth_client.client_id = String::from("aweifjaweijf");
 
     assert_eq!(auth_client.client_id, test_client_id);
     assert_eq!(auth_client.client_secret, test_client_secret);

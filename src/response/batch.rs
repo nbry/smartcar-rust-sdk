@@ -9,6 +9,9 @@ use super::{
 };
 
 #[derive(Serialize, Debug)]
+/// Individual smartcar endpoint/path to add to the batch request body
+///
+/// []()
 pub(crate) struct BatchRequestPath {
     pub(crate) path: String,
 }
@@ -37,7 +40,7 @@ pub(crate) fn build_batch_request_body(paths: Vec<String>) -> Result<Value, Erro
 
 #[derive(Deserialize, Debug)]
 #[serde(untagged)]
-pub enum BatchResponseBody {
+pub enum SmartcarResponseBody {
     ApplicationPermissions(ApplicationPermissions),
     EngineOilLife(EngineOilLife),
     BatteryCapacity(BatteryCapacity),
@@ -56,12 +59,13 @@ pub enum BatchResponseBody {
 #[derive(Debug, Deserialize)]
 pub struct BatchResponse {
     path: String,
-    body: BatchResponseBody,
+    body: SmartcarResponseBody,
     code: i32,
     headers: Option<Meta>,
 }
 
 #[derive(Debug, Deserialize)]
+/// List of responses from multiple Smartcar Endpoints
 pub struct Batch {
     responses: Vec<BatchResponse>,
 }

@@ -13,58 +13,58 @@ pub struct Access {
 
 #[derive(Deserialize, Debug)]
 pub struct ApplicationPermissions {
-    permissions: Vec<String>,
-    paging: Paging,
+    pub permissions: Vec<String>,
+    pub paging: Paging,
 }
 
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct EngineOilLife {
-    life_remaining: f32,
+    pub life_remaining: f32,
 }
 
 #[derive(Deserialize, Debug)]
 pub struct BatteryCapacity {
-    capacity: f32,
+    pub capacity: f32,
 }
 
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct BatteryLevel {
-    percent_remaining: f32,
-    range: f32,
+    pub percent_remaining: f32,
+    pub range: f32,
 }
 
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct ChargingStatus {
-    is_plugged_in: bool,
-    state: String,
+    pub is_plugged_in: bool,
+    pub state: String,
 }
 
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct FuelTank {
-    range: f32,
-    percent_remaining: f32,
-    amount_remaining: f32,
+    pub range: f32,
+    pub percent_remaining: f32,
+    pub amount_remaining: f32,
 }
 
 #[derive(Deserialize, Debug)]
 pub struct Location {
-    latitude: f32,
-    longitude: f32,
+    pub latitude: f32,
+    pub longitude: f32,
 }
 
 #[derive(Deserialize, Debug)]
 pub struct Odometer {
-    distance: f32,
+    pub distance: f32,
 }
 
 #[derive(Deserialize, Debug)]
 pub struct Paging {
-    count: i32,
-    offset: i32,
+    pub count: i32,
+    pub offset: i32,
 }
 
 #[derive(Deserialize, Debug)]
@@ -76,32 +76,32 @@ pub struct Vehicles {
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct TirePressure {
-    front_left: f32,
-    front_right: f32,
-    back_left: f32,
-    back_right: f32,
+    pub front_left: f32,
+    pub front_right: f32,
+    pub back_left: f32,
+    pub back_right: f32,
 }
 
 #[derive(Deserialize, Debug)]
 pub struct User {
-    id: String,
+    pub id: String,
 }
 
 #[derive(Deserialize, Debug)]
 pub struct VehicleAttributes {
-    id: String,
-    make: String,
-    model: String,
-    year: i32,
+    pub id: String,
+    pub make: String,
+    pub model: String,
+    pub year: i32,
 }
 
 #[derive(Deserialize, Debug)]
 pub struct Vin {
-    vin: String,
+    pub vin: String,
 }
 
 #[derive(Deserialize, Debug)]
 pub struct Action {
-    message: String,
-    status: String,
+    pub message: String,
+    pub status: String,
 }

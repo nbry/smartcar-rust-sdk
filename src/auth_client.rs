@@ -1,23 +1,35 @@
+use crate::error;
 use crate::helpers::{get_auth_url, get_connect_url};
 use crate::permission::Permissions;
 use crate::request::QueryString;
 use crate::response::Access;
 
 use reqwest::header::{HeaderMap, HeaderValue};
-use std::error::Error;
 use std::{collections::HashMap, env};
 
 pub mod auth_url_options;
-use self::auth_url_options::GetAuthUrlOptions;
+use self::auth_url_options::AuthUrlOptionsBuilder;
 
+/// A client for accessing Smartcar API
 pub struct AuthClient {
+    /// The application’s unique identifier. This is available on the credentials tab of the dashboard.
     client_id: String,
+
+    /// The application secret identfier. If forgotten, it must be regenerated in the dashboard.
     client_secret: String,
+
+    /// The URI a user will be redirected to after authorization.
+    /// This value must match one of the redirect URIs set in the
+    /// credentials tab of the dashboard.
     redirect_uri: String,
+
+    /// Launch the Smartcar auth flow in test mode
     test_mode: bool,
 }
 
 impl AuthClient {
+    /// Create an AuthClient instance from environment variables.
+    /// This is the preferred way to create an AuthClient Instance.
     pub fn from_env(test_mode: bool) -> AuthClient {
         let client_id = env::var("SMARTCAR_CLIENT_ID")
             .expect("SMARTCAR_CLIENT_ID environment variable not set");
@@ -51,7 +63,7 @@ impl AuthClient {
     }
 
     /// Get the URL that the user will go to for connecting their car
-    pub fn get_auth_url(&self, permissions: Permissions, options: GetAuthUrlOptions) -> String {
+    pub fn get_auth_url(&self, permissions: Permissions, options: AuthUrlOptionsBuilder) -> String {
         let scope_query = permissions.query_string();
         let option_query = options.query_string();
         let mut auth_query = self.query_string();
@@ -70,7 +82,7 @@ impl AuthClient {
         )
     }
 
-    pub async fn exchange_code(&self, code: &str) -> Result<Access, Box<dyn Error>> {
+    pub async fn exchange_code(&self, code: &str) -> Result<Access, error::Error> {
         let form = HashMap::from([
             ("grant_type", "authorization_code"),
             ("code", code),

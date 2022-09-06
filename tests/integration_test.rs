@@ -1,6 +1,6 @@
 use serial_test::serial;
 use smartcar::{
-    auth_client::{auth_url_options::GetAuthUrlOptions, AuthClient},
+    auth_client::{auth_url_options::AuthUrlOptionsBuilder, AuthClient},
     get_vehicles,
     permission::Permissions,
     vehicle::Vehicle,
@@ -11,13 +11,12 @@ mod helpers;
 #[tokio::test]
 #[serial]
 async fn full_e2e_bev() -> Result<(), Box<dyn std::error::Error>> {
-    println!("===================");
     let (client_id, client_secret, redirect_uri) = helpers::get_creds_from_env();
     let scope = Permissions::new().add_all();
 
     // SET UP AUTH CLIENT
     let ac = AuthClient::new(client_id, client_secret, redirect_uri, true);
-    let get_auth_url_options = GetAuthUrlOptions::new().set_force_prompt(true);
+    let get_auth_url_options = AuthUrlOptionsBuilder::new().set_force_prompt(true);
 
     // GET ACCESS TOKEN
     let url = ac.get_auth_url(scope, get_auth_url_options);
@@ -26,7 +25,7 @@ async fn full_e2e_bev() -> Result<(), Box<dyn std::error::Error>> {
     let access_token = access.access_token.as_str();
 
     // GET VEHICLES
-    let vehicles = get_vehicles(access.access_token.as_str(), None, None).await?;
+    let vehicles = get_vehicles(&access, None, None).await?;
     println!("got vehicle ids: {:#?}", vehicles);
 
     //  USE API ENDPOINTS ON ONE VEHICLE
@@ -94,7 +93,7 @@ async fn full_e2e_ice() -> Result<(), Box<dyn std::error::Error>> {
 
     // SET UP AUTH CLIENT
     let ac = AuthClient::new(client_id, client_secret, redirect_uri, true);
-    let get_auth_url_options = GetAuthUrlOptions::new().set_force_prompt(true);
+    let get_auth_url_options = AuthUrlOptionsBuilder::new().set_force_prompt(true);
 
     // GET ACCESS TOKEN
     let url = ac.get_auth_url(permissions, get_auth_url_options);
@@ -103,11 +102,11 @@ async fn full_e2e_ice() -> Result<(), Box<dyn std::error::Error>> {
     let access_token = access.access_token.as_str();
 
     // GET VEHICLES
-    let vehicles = get_vehicles(access.access_token.as_str(), None, None).await?;
+    let vehicles = get_vehicles(&access, None, None).await?;
     println!("got vehicle ids: {:#?}", vehicles);
 
     // USE API ENDPOINTS ON ONE VEHICLE
-    let id_of_first_vehicle = vehicles.vehicles[0].as_str();
+    let id_of_first_vehicle = vehicles.vehicles[1].as_str();
     let v = Vehicle::new(id_of_first_vehicle, access_token);
     println!("using first vehicle: {:#?}", v);
 

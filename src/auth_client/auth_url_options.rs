@@ -1,6 +1,6 @@
 use crate::request::QueryString;
 
-pub struct GetAuthUrlOptions {
+pub struct AuthUrlOptionsBuilder {
     force_prompt: Option<bool>,
     state: Option<String>,
     make_bypass: Option<String>,
@@ -8,9 +8,9 @@ pub struct GetAuthUrlOptions {
     single_select_by_vin: Option<String>,
 }
 
-impl GetAuthUrlOptions {
-    pub fn new() -> GetAuthUrlOptions {
-        GetAuthUrlOptions {
+impl AuthUrlOptionsBuilder {
+    pub fn new() -> AuthUrlOptionsBuilder {
+        AuthUrlOptionsBuilder {
             force_prompt: None,
             state: None,
             make_bypass: None,
@@ -45,7 +45,7 @@ impl GetAuthUrlOptions {
     }
 }
 
-impl QueryString for GetAuthUrlOptions {
+impl QueryString for AuthUrlOptionsBuilder {
     fn query_string(&self) -> String {
         let mut query_string = String::from("");
 
@@ -85,7 +85,7 @@ impl QueryString for GetAuthUrlOptions {
 
 #[test]
 fn get_auth_url_options_query_build() {
-    let query = GetAuthUrlOptions::new()
+    let query = AuthUrlOptionsBuilder::new()
         .set_make_bypass("mercedes".to_string())
         .set_state("no-michael-no-no-michael".to_string())
         .set_single_select_by_vin("THATISSONOTRIGHT".to_string())

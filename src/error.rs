@@ -1,23 +1,24 @@
+use serde::Deserialize;
 use std::collections::HashMap;
 
-use serde::Deserialize;
-use thiserror::Error;
-
-#[derive(Debug, Error)]
+#[derive(Debug, thiserror::Error)]
 pub enum Error {
-    #[error("reqwest error")]
+    #[error("sdk error::the http request failed")]
     RequestError(#[from] reqwest::Error),
 
-    #[error("serde_json error")]
+    #[error("sdk error::serde_json failed to serialize a struct")]
     DeserializeError(#[from] serde_json::Error),
 
-    #[error("error response from api")]
+    #[error("sdk error::serde_json failed to serialize a struct")]
+    InvalidLength(#[from] hmac::digest::InvalidLength),
+
+    #[error("smartcar error::error response from smartcar api")]
     SmartcarError(SmartcarError),
 }
 
-#[derive(Debug, Deserialize, Error)]
+#[derive(Debug, Deserialize, thiserror::Error)]
 #[serde(rename_all = "camelCase")]
-#[error("{error_type}:{description}")]
+#[error("{error_type}::{description}")]
 pub struct SmartcarError {
     #[serde(rename = "type")]
     error_type: String,

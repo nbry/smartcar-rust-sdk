@@ -1,16 +1,24 @@
 [package]
 name = "smartcar"
-version = "0.1.0"
+version = "0.1.1-beta.0"
 edition = "2021"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+license = "MIT"
+documentation= ""
+homepage = "https://github.com/nbry/smartcar-rust-sdk"
+repository = "https://github.com/nbry/smartcar-rust-sdk"
+description = """
+Rust client SDK for the Smartcar API
+"""
 
 [dependencies]
 base64 = "0.13.0"
 chrono = {version = "0.4", features = ["serde"] }
+hmac = "0.12.1"
+hex = "0.4.3"
 reqwest = { version = "0.11", features = ["json", "blocking", "cookies"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1.0.82"
+sha2 = "0.10"
 thiserror = "1.0"
 tokio = { version = "1", features = ["full"] }
 url = "2.2.2"

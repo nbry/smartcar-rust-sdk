@@ -71,6 +71,7 @@ pub(crate) async fn run_connect_flow(
     let code = &all_queries[0].1;
     println!("connect - code query isolated: {}", code);
 
+    println!("===================");
     Ok(code.to_owned())
 }
 

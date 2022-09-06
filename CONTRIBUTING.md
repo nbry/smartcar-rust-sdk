@@ -18,5 +18,8 @@ export E2E_SMARTCAR_REDIRECT_URI='<Your redirect URI>'
 
 4. Open another shell and run geckodriver on port 4444
 
-5. `cargo test -- --nocapture` (for print statements)
+```
+geckodriver --port 4444
+```
 
+5. `cargo test -- --nocapture` (for print statements)

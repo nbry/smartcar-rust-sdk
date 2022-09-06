@@ -36,8 +36,8 @@ pub(crate) async fn smartcar_request(
     let req = reqwest::Client::new();
     let mut req_builder = match verb {
         HttpVerb::GET => req.get(url),
-        HttpVerb::POST => req.get(url),
-        HttpVerb::DELETE => req.get(url),
+        HttpVerb::POST => req.post(url),
+        HttpVerb::DELETE => req.delete(url),
     };
 
     req_builder = req_builder.headers(headers);

@@ -12,6 +12,9 @@ pub mod webhooks;
 use request::get_bearer_token_header;
 use response::{Access, Vehicles};
 
+/// Return a list of the user's vehicle ids
+///
+/// More info on [get all vehicles request](https://smartcar.com/api#get-all-vehicles)
 pub async fn get_vehicles(
     access: &Access,
     limit: Option<i32>,

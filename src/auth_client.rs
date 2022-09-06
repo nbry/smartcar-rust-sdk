@@ -10,9 +10,14 @@ use std::{collections::HashMap, env};
 pub mod auth_url_options;
 use self::auth_url_options::AuthUrlOptionsBuilder;
 
-/// A client for accessing Smartcar API
+/// Smartcar OAuth client for your application
+///
+/// Vist the [Smartcar Developer Portal](https://developer.smartcar.com)
+/// to get these fields.
+///
+/// Login/Signup for a Smartcar account here [here](https://smartcar.com/subscribe)
 pub struct AuthClient {
-    /// The application’s unique identifier. This is available on the credentials tab of the dashboard.
+    /// The application’s unique identifier, obtained
     client_id: String,
 
     /// The application secret identfier. If forgotten, it must be regenerated in the dashboard.
@@ -62,7 +67,9 @@ impl AuthClient {
         }
     }
 
-    /// Get the URL that the user will go to for connecting their car
+    /// Generate the Smartcar Connect URL
+    ///
+    /// More info on [Smartcar Connect](https://smartcar.com/api#smartcar-connect)
     pub fn get_auth_url(&self, permissions: Permissions, options: AuthUrlOptionsBuilder) -> String {
         let scope_query = permissions.query_string();
         let option_query = options.query_string();
@@ -82,6 +89,9 @@ impl AuthClient {
         )
     }
 
+    /// Exhange your oauth code for an access token
+    ///
+    /// More info on [auth code exchange](https://smartcar.com/api#auth-code-exchange)
     pub async fn exchange_code(&self, code: &str) -> Result<Access, error::Error> {
         let form = HashMap::from([
             ("grant_type", "authorization_code"),

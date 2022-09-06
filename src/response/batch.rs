@@ -9,9 +9,6 @@ use super::{
 };
 
 #[derive(Serialize, Debug)]
-/// Individual smartcar endpoint/path to add to the batch request body
-///
-/// []()
 pub(crate) struct BatchRequestPath {
     pub(crate) path: String,
 }
@@ -57,6 +54,9 @@ pub enum SmartcarResponseBody {
 }
 
 #[derive(Debug, Deserialize)]
+/// Individual response in a batch response body
+///
+/// [More info on batch](https://smartcar.com/api#post-batch-request)
 pub struct BatchResponse {
     path: String,
     body: SmartcarResponseBody,
@@ -65,7 +65,10 @@ pub struct BatchResponse {
 }
 
 #[derive(Debug, Deserialize)]
-/// List of responses from multiple Smartcar Endpoints
+/// Returned list of responses for multiple Smartcar Endpoints after
+/// sending a batch request
+///
+/// [More info on batch](https://smartcar.com/api#post-batch-request)
 pub struct Batch {
     responses: Vec<BatchResponse>,
 }

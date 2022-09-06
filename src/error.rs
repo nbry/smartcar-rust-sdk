@@ -4,13 +4,13 @@ use std::collections::HashMap;
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
     #[error("sdk error::the http request failed")]
-    RequestError(#[from] reqwest::Error),
+    SdkReqwestFailure(#[from] reqwest::Error),
 
     #[error("sdk error::serde_json failed to serialize a struct")]
-    DeserializeError(#[from] serde_json::Error),
+    SdkDeserializationFailure(#[from] serde_json::Error),
 
-    #[error("sdk error::serde_json failed to serialize a struct")]
-    InvalidLength(#[from] hmac::digest::InvalidLength),
+    #[error("sdk error::hmac digest error")]
+    SdkHmacInvalidLength(#[from] hmac::digest::InvalidLength),
 
     #[error("smartcar error::error response from smartcar api")]
     SmartcarError(SmartcarError),

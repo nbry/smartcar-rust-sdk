@@ -29,6 +29,7 @@ impl UnitSystem {
     }
 }
 
+/// A vehicle instance, for making requests to Smartcar API
 #[derive(Debug)]
 pub struct Vehicle {
     pub id: String,
@@ -45,6 +46,10 @@ impl Vehicle {
         }
     }
 
+    /// Returns a list of the permissions that have been granted to your application
+    /// in relation to this vehicle
+    ///
+    /// [Get Application Permissions](https://smartcar.com/api#get-application-permissions)
     pub async fn permissions(&self) -> Result<(ApplicationPermissions, Meta), Error> {
         let path = "/permissions";
         let (res, meta) = self.get_request(path, false).await?;
@@ -53,6 +58,9 @@ impl Vehicle {
         Ok((data, meta))
     }
 
+    /// Returns the remaining life span of a vehicle’s engine oil.
+    ///
+    /// [Engine Oil](https://smartcar.com/api#get-engine-oil-life)
     pub async fn engine_oil(&self) -> Result<(EngineOilLife, Meta), Error> {
         let path = "/engine/oil";
         let (res, meta) = self.get_request(path, false).await?;
@@ -61,6 +69,9 @@ impl Vehicle {
         Ok((data, meta))
     }
 
+    /// Returns the total capacity of an electric vehicle's battery.
+    ///
+    /// [EV Battery Capacity](https://smartcar.com/api#get-ev-battery-capacity)
     pub async fn battery_capacity(&self) -> Result<(BatteryCapacity, Meta), Error> {
         let path = "/battery/capacity";
         let (res, meta) = self.get_request(path, false).await?;
@@ -69,6 +80,9 @@ impl Vehicle {
         Ok((data, meta))
     }
 
+    /// Returns the state of charge (SOC) and the remaining range of an electric vehicle's battery.
+    ///
+    /// [EV Battery Level](https://smartcar.com/api#get-ev-battery-level)
     pub async fn battery_level(&self) -> Result<(BatteryLevel, Meta), Error> {
         let path = "/battery";
         let (res, meta) = self.get_request(path, false).await?;
@@ -77,6 +91,9 @@ impl Vehicle {
         Ok((data, meta))
     }
 
+    /// Returns the current charge status of an electric vehicle.
+    ///
+    /// [EV Charging Status](https://smartcar.com/api#get-ev-charging-status)
     pub async fn charging_status(&self) -> Result<(ChargingStatus, Meta), Error> {
         let path = "/charge";
         let (res, meta) = self.get_request(path, false).await?;
@@ -85,6 +102,10 @@ impl Vehicle {
         Ok((data, meta))
     }
 
+    /// Returns the status of the fuel remaining in the vehicle’s gas tank.
+    /// Note: The fuel tank API is only available for vehicles sold in the United States.
+    ///
+    /// [Fuel Tank](https://smartcar.com/api#get-fuel-tank)
     pub async fn fuel_tank(&self) -> Result<(FuelTank, Meta), Error> {
         let path = "/fuel";
         let (res, meta) = self.get_request(path, false).await?;
@@ -93,6 +114,9 @@ impl Vehicle {
         Ok((data, meta))
     }
 
+    /// Returns the last known location of the vehicle in geographic coordinates.
+    ///
+    /// [Location](https://smartcar.com/api#get-location)
     pub async fn location(&self) -> Result<(Location, Meta), Error> {
         let path = "/location";
         let (res, meta) = self.get_request(path, false).await?;
@@ -101,6 +125,9 @@ impl Vehicle {
         Ok((data, meta))
     }
 
+    /// Returns the vehicle’s last known odometer reading.
+    ///
+    /// [Odometer](https://smartcar.com/api#get-odometer)
     pub async fn odometer(&self) -> Result<(Odometer, Meta), Error> {
         let path = "/odometer";
         let (res, meta) = self.get_request(path, false).await?;
@@ -109,6 +136,9 @@ impl Vehicle {
         Ok((data, meta))
     }
 
+    /// Returns the air pressure of each of the vehicle’s tires.
+    ///
+    /// [Tire Pressure](https://smartcar.com/api#get-tire-pressure)
     pub async fn tire_pressure(&self) -> Result<(TirePressure, Meta), Error> {
         let path = "/tires/pressure";
         let (res, meta) = self.get_request(path, false).await?;
@@ -117,6 +147,9 @@ impl Vehicle {
         Ok((data, meta))
     }
 
+    /// Returns the id of the vehicle owner who granted access to your application.
+    ///
+    /// [User](https://smartcar.com/api#get-user)
     pub async fn user(&self) -> Result<(User, Meta), Error> {
         let path = "/user";
         let (res, meta) = self.get_request(path, true).await?;
@@ -125,6 +158,9 @@ impl Vehicle {
         Ok((data, meta))
     }
 
+    /// Returns a single vehicle object, containing identifying information.
+    ///
+    /// [Vehicle Attributes](https://smartcar.com/api#get-vehicle-attributes)
     pub async fn attributes(&self) -> Result<(VehicleAttributes, Meta), Error> {
         let path = "/";
         let (res, meta) = self.get_request(path, false).await?;
@@ -133,6 +169,9 @@ impl Vehicle {
         Ok((data, meta))
     }
 
+    /// Returns the vehicle’s manufacturer identifier.
+    ///
+    /// [VIN](https://github.com/smartcar/java-sdk)
     pub async fn vin(&self) -> Result<(Vin, Meta), Error> {
         let path = "/vin";
         let (res, meta) = self.get_request(path, false).await?;
@@ -141,6 +180,9 @@ impl Vehicle {
         Ok((data, meta))
     }
 
+    /// Lock the vehicle.
+    ///
+    /// [Lock/Unlock](https://smartcar.com/api#post-lockunlock)
     pub async fn lock(&self) -> Result<(Action, Meta), Error> {
         let path = "/security";
         let req_body = json!({ "action": "LOCK"});
@@ -150,6 +192,9 @@ impl Vehicle {
         Ok((data, meta))
     }
 
+    /// Unlock the vehicle.
+    ///
+    /// [Lock/Unlock Doors](https://smartcar.com/api#post-lockunlock)
     pub async fn unlock(&self) -> Result<(Action, Meta), Error> {
         let path = "/securiy";
         let req_body = json!({ "action": "UNLOCK"});
@@ -159,6 +204,9 @@ impl Vehicle {
         Ok((data, meta))
     }
 
+    /// Start charging an electric vehicle.
+    ///
+    /// [Start/Stop Charge](https://smartcar.com/api#post-ev-startstop-charge)
     pub async fn start_charge(&self) -> Result<(Action, Meta), Error> {
         let path = "/charge";
         let req_body = json!({ "action": "START"});
@@ -168,6 +216,9 @@ impl Vehicle {
         Ok((data, meta))
     }
 
+    /// Stop charging an electric vehicle.
+    ///
+    /// [Start/Stop Charge](https://smartcar.com/api#post-ev-startstop-charge)
     pub async fn stop_charge(&self) -> Result<(Action, Meta), Error> {
         let path = "/charge";
         let req_body = json!({ "action": "STOP"});
@@ -177,6 +228,9 @@ impl Vehicle {
         Ok((data, meta))
     }
 
+    /// Returns a list of responses from multiple Smartcar endpoints, all combined into a single request.
+    ///
+    /// [Batch Request](https://smartcar.com/api#post-batch-request)
     pub async fn batch(&self, paths: Vec<String>) -> Result<(Batch, Meta), Error> {
         let path = "/batch";
         let req_body = build_batch_request_body(paths)?;

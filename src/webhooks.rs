@@ -6,6 +6,7 @@ type HmacSha256 = Hmac<Sha256>;
 
 use crate::error::Error;
 
+/// Generate hash challenege for webhooks.
 pub fn hash_challenge(amt: &str, challenge: &str) -> Result<String, Error> {
     let mut mac = HmacSha256::new_from_slice(challenge.as_bytes())?;
     mac.update(amt.as_bytes());
@@ -14,6 +15,7 @@ pub fn hash_challenge(amt: &str, challenge: &str) -> Result<String, Error> {
     Ok(hex::encode(mac_bytes))
 }
 
+/// Verify webhook payload with AMT and signature.
 pub fn verify_payload(amt: &str, signature: &str, body: &str) -> Result<bool, Error> {
     Ok(hash_challenge(amt, body)? == signature.to_string())
 }

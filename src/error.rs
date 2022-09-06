@@ -6,8 +6,8 @@ pub enum Error {
     #[error("sdk error::the http request failed")]
     SdkReqwestFailure(#[from] reqwest::Error),
 
-    #[error("sdk error::serde_json failed to serialize a struct")]
-    SdkDeserializationFailure(#[from] serde_json::Error),
+    #[error("sdk error::serde_json failed to (de)serialization failure")]
+    SdkSerdeFailure(#[from] serde_json::Error),
 
     #[error("sdk error::hmac digest error")]
     SdkHmacInvalidLength(#[from] hmac::digest::InvalidLength),

@@ -100,3 +100,8 @@ pub struct Action {
     pub message: String,
     pub status: String,
 }
+
+#[derive(Deserialize, Debug)]
+pub struct Disconnect {
+    pub status: String,
+}

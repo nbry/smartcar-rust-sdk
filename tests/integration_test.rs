@@ -72,9 +72,6 @@ async fn full_e2e_bev() -> Result<(), Box<dyn std::error::Error>> {
     let tire_pressure = v.tire_pressure().await?;
     println!("tire pressure: {:#?}", tire_pressure);
 
-    let user = v.user().await?;
-    println!("user: {:#?}", user);
-
     let vin = v.vin().await?;
     println!("vin: {:#?}", vin);
 

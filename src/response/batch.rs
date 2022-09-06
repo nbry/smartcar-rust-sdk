@@ -5,7 +5,7 @@ use crate::error::{Error, SmartcarError};
 
 use super::{
     meta::Meta, ApplicationPermissions, BatteryCapacity, BatteryLevel, ChargingStatus,
-    EngineOilLife, FuelTank, Location, Odometer, TirePressure, User, VehicleAttributes, Vin,
+    EngineOilLife, FuelTank, Location, Odometer, TirePressure, VehicleAttributes, Vin,
 };
 
 #[derive(Serialize, Debug)]
@@ -47,7 +47,6 @@ pub enum SmartcarResponseBody {
     Location(Location),
     Odometer(Odometer),
     TirePressure(TirePressure),
-    User(User),
     VehicleAttributes(VehicleAttributes),
     Vin(Vin),
     SmartcarError(SmartcarError),

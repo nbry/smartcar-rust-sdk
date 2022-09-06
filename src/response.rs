@@ -83,11 +83,6 @@ pub struct TirePressure {
 }
 
 #[derive(Deserialize, Debug)]
-pub struct User {
-    pub id: String,
-}
-
-#[derive(Deserialize, Debug)]
 pub struct VehicleAttributes {
     pub id: String,
     pub make: String,

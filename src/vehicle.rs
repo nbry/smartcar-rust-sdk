@@ -3,7 +3,7 @@ use serde_json::{json, Value};
 
 use crate::error::{Error, SmartcarError};
 use crate::helpers;
-use crate::request;
+use crate::request::{self, HttpVerb};
 use crate::response::batch::{build_batch_request_body, Batch};
 use crate::response::meta;
 use crate::response::meta::Meta;
@@ -11,7 +11,7 @@ use crate::response::{Action, ApplicationPermissions};
 
 use crate::response::{
     BatteryCapacity, BatteryLevel, ChargingStatus, EngineOilLife, FuelTank, Location, Odometer,
-    TirePressure, User, VehicleAttributes, Vin,
+    TirePressure, VehicleAttributes, Vin,
 };
 
 #[derive(Debug)]
@@ -143,17 +143,6 @@ impl Vehicle {
         let path = "/tires/pressure";
         let (res, meta) = self.get_request(path, false).await?;
         let data = res.json::<TirePressure>().await?;
-
-        Ok((data, meta))
-    }
-
-    /// Returns the id of the vehicle owner who granted access to your application.
-    ///
-    /// [User](https://smartcar.com/api#get-user)
-    pub async fn user(&self) -> Result<(User, Meta), Error> {
-        let path = "/user";
-        let (res, meta) = self.get_request(path, true).await?;
-        let data = res.json::<User>().await?;
 
         Ok((data, meta))
     }

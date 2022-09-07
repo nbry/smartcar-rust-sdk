@@ -19,6 +19,9 @@ pub enum Error {
     SmartcarError(SmartcarError),
 }
 
+/// Error response from Smartcar api
+///
+/// [More info about Smartcar Errors](https://smartcar.com/docs/api/#errors)
 #[derive(Debug, Deserialize, Serialize, thiserror::Error)]
 #[serde(rename_all = "camelCase")]
 #[error("{error_type}::{description}")]

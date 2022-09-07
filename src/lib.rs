@@ -1,5 +1,3 @@
-#![crate_type = "lib"]
-
 pub(crate) mod helpers;
 
 pub mod auth_client;
@@ -50,9 +48,17 @@ pub async fn get_vehicles(
     Ok((data, meta))
 }
 
+/// Options for Compatibility API
 pub struct CompatibilityOptions {
+    /// Client ID from your dashboard
+    /// Default: Will use SMARTCAR_CLIENT_ID env variable
     pub client_id: Option<String>,
+
+    /// Client Secret, generated from your sadhboard
+    /// Default: Will use SMARTAR_CLIENT_SECRET env variable
     pub client_secret: Option<String>,
+
+    /// Optional flags that your application has early access to
     pub flags: Option<HashMap<String, String>>,
 }
 
@@ -120,10 +126,9 @@ pub async fn get_compatibility(
 /// PERMISSION/SCOPE ///
 ////////////////////////
 
-/// # Smartcar Permission
+/// A permission that your application is requesting access to during SmartcarConnect
 ///
-/// A permission that your application is requesting
-/// access to during SmartcarConnect
+/// [More info about Permissions](https://smartcar.com/docs/api/#permissions)
 #[derive(Deserialize, Debug, Eq, PartialEq, Hash)]
 pub enum Permission {
     ReadEngineOil,   // Read vehicle engine oil health
@@ -159,7 +164,7 @@ impl Permission {
     }
 }
 
-/// Builder for adding permissions to your app
+/// Builder of a list of permissions
 #[derive(Deserialize, Debug)]
 pub struct ScopeBuilder {
     permissions: HashSet<Permission>,

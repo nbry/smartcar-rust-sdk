@@ -7,6 +7,9 @@ use crate::{error, request};
 
 use std::{collections::HashMap, env};
 
+/// Pass in options to build a Smartcar Connect URL.
+///
+/// [Info about Smartcar Connect ](https://smartcar.com/docs/api/#smartcar-connect)
 pub struct AuthUrlOptionsBuilder {
     force_prompt: Option<bool>,
     state: Option<String>,
@@ -28,31 +31,63 @@ impl AuthUrlOptionsBuilder {
         }
     }
 
+    /// Set the behavior of the approval dialog displayed to the user
+    ///
+    /// `true` -> only display approval dialog if user has not previously approved
+    /// `false` -> ensure approval dialog is always shown
+    ///
+    /// [Info about Smartcar Connect ](https://smartcar.com/docs/api/#smartcar-connect)
     pub fn set_force_prompt(mut self, enabled: bool) -> Self {
         self.force_prompt = Some(enabled);
         self
     }
 
+    /// Set a value as a query parameter in the redirect_uri back to your application.
+    /// This value is often used to identify a user and/or prevent cross-site request forgery.
+    ///
+    /// [Info about Smartcar Connect ](https://smartcar.com/docs/api/#smartcar-connect)
     pub fn set_state(mut self, state: String) -> Self {
         self.state = Some(state);
         self
     }
 
+    /// Bypass the car brand selection screen.
+    ///
+    /// Valid names can be found [here](https://smartcar.com/docs/api/#makes)
+    ///
+    /// [Info about Smartcar Connect ](https://smartcar.com/docs/api/#smartcar-connect)
+    /// [Info about Brand Select](https://smartcar.com/docs/api/#brand-select)
     pub fn set_make_bypass(mut self, make: String) -> Self {
         self.make_bypass = Some(make);
         self
     }
 
+    /// Only allow user to select a single vehicle.
+    ///
+    /// Valid names can be found [here](https://smartcar.com/docs/api/#makes)
+    ///
+    /// [Info about Smartcar Connect ](https://smartcar.com/docs/api/#smartcar-connect)
+    /// [Info about Single Select](https://smartcar.com/docs/api/#single-select)
     pub fn set_single_select(mut self, enabled: bool) -> Self {
         self.single_select = Some(enabled);
         self
     }
 
+    /// Only allow user to select a single vehicle with a specific vin.
+    ///
+    /// Valid names can be found [here](https://smartcar.com/docs/api/#makes)
+    ///
+    /// [Info about Smartcar Connect ](https://smartcar.com/docs/api/#smartcar-connect)
+    /// [Info about Single Select](https://smartcar.com/docs/api/#single-select)
     pub fn set_single_select_by_vin(mut self, vin: String) -> Self {
         self.single_select_by_vin = Some(vin);
         self
     }
 
+    /// Set flags that your application has early access to
+    ///
+    /// [Info about Smartcar Connect ](https://smartcar.com/docs/api/#smartcar-connect)
+    /// [Info about Flags](https://smartcar.com/docs/api/#flags)
     pub fn set_flags(mut self, flags: &HashMap<String, String>) -> Self {
         self.flags = Some(flags.to_owned());
         self
@@ -179,9 +214,10 @@ impl AuthClient {
         }
     }
 
-    /// Generate the Smartcar Connect URL
+    /// Generate the Smartcar Connect URL, which will allow your userse to securely
+    /// grant your application permissions to interact with their vehicle.
     ///
-    /// More info on [Smartcar Connect](https://smartcar.com/api#smartcar-connect)
+    /// [Info about Smartcar Connect ](https://smartcar.com/docs/api/#smartcar-connect)
     pub fn get_auth_url(&self, scope: &ScopeBuilder, options: AuthUrlOptionsBuilder) -> String {
         let mut url = get_connect_url();
 
@@ -205,7 +241,7 @@ impl AuthClient {
 
     /// Exhange your oauth code for an access token
     ///
-    /// More info on [auth code exchange](https://smartcar.com/api#auth-code-exchange)
+    /// [Info about auth code exchange](https://smartcar.com/api#auth-code-exchange)
     pub async fn exchange_code(&self, code: &str) -> Result<(Access, Meta), error::Error> {
         let form = HashMap::from([
             ("grant_type", "authorization_code"),
@@ -253,7 +289,6 @@ fn get_auth_url() {
     let auth_url = ac.get_auth_url(&scope, options);
 
     let expecting =String::from("https://connect.smartcar.com/oauth/authorize?scope=read_engine_oil read_battery read_charge control_charge read_thermometer read_fuel read_location control_security read_odometer read_tires read_vehicle_info read_vin&response_type=code&client_id=test-client-id&client_secret=test-client-secret&redirect_uri=test.com&mode=test");
-
     assert_eq!(auth_url, expecting);
 }
 

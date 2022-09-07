@@ -12,6 +12,9 @@ pub enum Error {
     #[error("sdk error::hmac digest error")]
     SdkHmacInvalidLength(#[from] hmac::digest::InvalidLength),
 
+    #[error("smartcar error::function call with missing params")]
+    MissingParameters(String),
+
     #[error("smartcar error::error response from smartcar api")]
     SmartcarError(SmartcarError),
 }

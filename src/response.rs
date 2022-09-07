@@ -1,6 +1,7 @@
 use serde::Deserialize;
 
 pub mod batch;
+pub mod compatibility;
 pub mod meta;
 
 #[derive(Deserialize, Debug)]

@@ -1,7 +1,5 @@
 use serde::Deserialize;
 
-use crate::request::QueryString;
-
 /// # Smartcar Permission
 ///
 /// A permission that your application is requesting
@@ -56,6 +54,17 @@ impl Permissions {
             .add(Permission::ReadVehicleInfo)
             .add(Permission::ReadVin)
     }
+
+    pub(crate) fn query_value(&self) -> String {
+        let mut query_value = String::from("");
+
+        for p in self.permissions.iter() {
+            query_value.push_str(get_query_param_for_permission(p));
+            query_value.push_str(" ");
+        }
+
+        query_value.trim().to_string()
+    }
 }
 
 fn get_query_param_for_permission(permission: &Permission) -> &str {
@@ -75,29 +84,13 @@ fn get_query_param_for_permission(permission: &Permission) -> &str {
     }
 }
 
-impl QueryString for Permissions {
-    /// Build the URL query param for `scope`
-    fn query_string(&self) -> String {
-        let mut space_separated_permissions = String::from("");
-
-        self.permissions.iter().for_each(|permission| {
-            let param = get_query_param_for_permission(permission);
-            space_separated_permissions.push_str(" ");
-            space_separated_permissions.push_str(param);
-        });
-
-        format!("&scope={}", space_separated_permissions.trim())
-    }
-}
-
 #[test]
 fn test_getting_scope_url_params_string() {
-    let scope_query_param = Permissions::new()
+    let permissions = Permissions::new()
         .add(Permission::ReadEngineOil)
         .add(Permission::ReadFuel)
-        .add(Permission::ReadVin)
-        .query_string();
+        .add(Permission::ReadVin);
 
-    let expected = String::from("&scope=read_engine_oil read_fuel read_vin");
-    assert_eq!(scope_query_param, expected)
+    let expecting = "read_engine_oil read_fuel read_vin";
+    assert_eq!(permissions.query_value(), expecting);
 }

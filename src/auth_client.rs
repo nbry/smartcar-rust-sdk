@@ -1,10 +1,10 @@
-use crate::error;
-use crate::helpers::{get_auth_url, get_connect_url};
+use crate::helpers::{get_connect_url, get_oauth_url};
 use crate::permission::Permissions;
-use crate::request::QueryString;
+use crate::request::{MultiQuery, SmartcarRequestBuilder};
+use crate::response::meta::Meta;
 use crate::response::Access;
+use crate::{error, request};
 
-use reqwest::header::{HeaderMap, HeaderValue};
 use std::{collections::HashMap, env};
 
 pub mod auth_url_options;
@@ -54,15 +54,15 @@ impl AuthClient {
     }
 
     pub fn new(
-        client_id: String,
-        client_secret: String,
-        redirect_uri: String,
+        client_id: &str,
+        client_secret: &str,
+        redirect_uri: &str,
         test_mode: bool,
     ) -> AuthClient {
         AuthClient {
-            client_id,
-            client_secret,
-            redirect_uri,
+            client_id: client_id.to_string(),
+            client_secret: client_secret.to_string(),
+            redirect_uri: redirect_uri.to_string(),
             test_mode,
         }
     }
@@ -70,83 +70,82 @@ impl AuthClient {
     /// Generate the Smartcar Connect URL
     ///
     /// More info on [Smartcar Connect](https://smartcar.com/api#smartcar-connect)
-    pub fn get_auth_url(&self, permissions: Permissions, options: AuthUrlOptionsBuilder) -> String {
-        let scope_query = permissions.query_string();
-        let option_query = options.query_string();
-        let mut auth_query = self.query_string();
+    pub fn get_auth_url(
+        &self,
+        permissions: &Permissions,
+        options: AuthUrlOptionsBuilder,
+    ) -> String {
+        let mut url = get_connect_url();
 
-        if !option_query.contains("approval_prompt") {
-            auth_query.push_str("&approval_prompt=auto");
-        };
+        url.push_str("/oauth/authorize?scope=");
+        url.push_str(permissions.query_value().as_str());
 
-        format!(
-            "{url}{path}?{auth}{scope}{option}",
-            url = get_connect_url(),
-            path = "/oauth/authorize",
-            auth = auth_query,
-            scope = scope_query,
-            option = option_query,
-        )
+        url.push_str("&response_type=code&");
+
+        url.push_str(self.multi_query().as_str());
+
+        let options_query = options.multi_query();
+
+        if options_query.len() > 0 {
+            if !options_query.contains("approval_prompt") {
+                url.push_str("&approval_prompt=auto");
+            };
+
+            url.push_str("&");
+            url.push_str(options_query.as_str());
+        }
+
+        url
     }
 
     /// Exhange your oauth code for an access token
     ///
     /// More info on [auth code exchange](https://smartcar.com/api#auth-code-exchange)
-    pub async fn exchange_code(&self, code: &str) -> Result<Access, error::Error> {
+    pub async fn exchange_code(&self, code: &str) -> Result<(Access, Meta), error::Error> {
         let form = HashMap::from([
             ("grant_type", "authorization_code"),
             ("code", code),
             ("redirect_uri", self.redirect_uri.as_str()),
         ]);
 
-        let mut headers = HeaderMap::new();
-        headers.insert("Authorization", self.get_b64_auth_header_value());
-        headers.insert(
-            "content-type",
-            HeaderValue::from_str("application/x-www-form-urlencoded").unwrap(),
-        );
-
-        let body = reqwest::Client::new()
-            .post(get_auth_url())
-            .headers(headers)
-            .form(&form)
+        let (res, meta) = SmartcarRequestBuilder::new(get_oauth_url(), request::HttpVerb::POST)
+            .add_header(
+                "Authorization",
+                request::get_basic_b64_auth_header(&self.client_id, &self.client_secret).as_str(),
+            )
+            .add_header("content_type", "application/x-www-form-urlencoded")
+            .add_form(form)
             .send()
             .await?;
 
-        let res = body.json::<Access>().await?;
+        let data = res.json::<Access>().await?;
 
-        Ok(res)
-    }
-
-    fn get_b64_auth_header_value(&self) -> HeaderValue {
-        let credentials = format!(
-            "{client_id}:{client_secret}",
-            client_id = self.client_id,
-            client_secret = self.client_secret
-        );
-        let encoded = base64::encode(credentials.as_bytes());
-        let header_value = format!("Basic {}", encoded.as_str());
-
-        HeaderValue::from_str(header_value.as_str()).unwrap()
+        Ok((data, meta))
     }
 }
 
-impl QueryString for AuthClient {
-    fn query_string(&self) -> String {
-        let mut query_string = format!(
-            "&client_id={id}\
-            &client_secret={secret}\
-            &redirect_uri={uri}\
-            &response_type=code",
-            id = self.client_id.as_str(),
-            secret = self.client_secret.as_str(),
-            uri = self.redirect_uri.as_str()
-        );
+impl MultiQuery for AuthClient {
+    fn vectorize(&self) -> Vec<(String, String)> {
+        let mut query = Vec::new();
+
+        query.push(("client_id".to_string(), self.client_id.to_owned()));
+        query.push(("client_secret".to_string(), self.client_secret.to_owned()));
+        query.push(("redirect_uri".to_string(), self.redirect_uri.to_owned()));
 
         if self.test_mode {
-            query_string.push_str("&mode=test");
+            query.push(("mode".to_string(), "test".to_string()));
         }
 
-        query_string
+        query
     }
+}
+
+#[test]
+fn get_auth_url() {
+    let ac = AuthClient::new("test-client-id", "test-client-secret", "test.com", true);
+    let permissions = Permissions::new().add_all();
+    let options = AuthUrlOptionsBuilder::new();
+    let auth_url = ac.get_auth_url(&permissions, options);
+
+    println!("{}", auth_url);
 }

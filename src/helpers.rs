@@ -1,4 +1,4 @@
-use std::env;
+use std::{collections::HashMap, env};
 
 pub(crate) fn get_api_url() -> String {
     match env::var("SMARTCAR_API_ORIGIN") {
@@ -7,7 +7,7 @@ pub(crate) fn get_api_url() -> String {
     }
 }
 
-pub(crate) fn get_auth_url() -> String {
+pub(crate) fn get_oauth_url() -> String {
     match env::var("SMARTCAR_AUTH_ORIGIN") {
         Ok(api_url) => api_url,
         Err(_) => String::from("https://auth.smartcar.com/oauth/token"),
@@ -19,4 +19,25 @@ pub(crate) fn get_connect_url() -> String {
         Ok(api_url) => api_url,
         Err(_) => String::from("https://connect.smartcar.com"),
     }
+}
+
+/// Get the request query value for flags
+///
+/// Note: Does not include the &flag= query key
+pub(crate) fn format_flag_query(flags: &HashMap<String, String>) -> String {
+    let mut query = String::from("");
+    if flags.keys().len() == 0 {
+        return query;
+    };
+
+    flags.keys().into_iter().for_each(|flag| {
+        let value = flags.get(flag);
+
+        if let Some(v) = value {
+            let flag_formatted = format!("{}:{}", flag, v);
+            query.push_str(flag_formatted.as_str());
+        };
+    });
+
+    query
 }

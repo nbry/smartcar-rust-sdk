@@ -52,10 +52,10 @@ pub enum SmartcarResponseBody {
     SmartcarError(SmartcarError),
 }
 
-#[derive(Debug, Deserialize)]
 /// Individual response in a batch response body
 ///
 /// [More info on batch](https://smartcar.com/api#post-batch-request)
+#[derive(Debug, Deserialize)]
 pub struct BatchResponse {
     path: String,
     body: SmartcarResponseBody,
@@ -63,11 +63,11 @@ pub struct BatchResponse {
     headers: Option<Meta>,
 }
 
-#[derive(Debug, Deserialize)]
 /// Returned list of responses for multiple Smartcar Endpoints after
 /// sending a batch request
 ///
 /// [More info on batch](https://smartcar.com/api#post-batch-request)
+#[derive(Debug, Deserialize)]
 pub struct Batch {
     responses: Vec<BatchResponse>,
 }

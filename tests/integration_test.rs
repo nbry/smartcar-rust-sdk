@@ -4,6 +4,7 @@ use smartcar::{
     get_vehicles,
     permission::Permissions,
     vehicle::Vehicle,
+    CompatibilityOptions,
 };
 
 mod helpers;
@@ -15,17 +16,22 @@ async fn full_e2e_bev() -> Result<(), Box<dyn std::error::Error>> {
     let scope = Permissions::new().add_all();
 
     // SET UP AUTH CLIENT
-    let ac = AuthClient::new(client_id, client_secret, redirect_uri, true);
+    let ac = AuthClient::new(
+        client_id.as_str(),
+        client_secret.as_str(),
+        redirect_uri.as_str(),
+        true,
+    );
     let get_auth_url_options = AuthUrlOptionsBuilder::new().set_force_prompt(true);
 
     // GET ACCESS TOKEN
-    let url = ac.get_auth_url(scope, get_auth_url_options);
+    let url = ac.get_auth_url(&scope, get_auth_url_options);
     let code = helpers::run_connect_flow(url.as_str(), "TESLA", "4444").await?;
-    let access = ac.exchange_code(code.as_str()).await?;
+    let (access, _) = ac.exchange_code(code.as_str()).await?;
     let access_token = access.access_token.as_str();
 
     // GET VEHICLES
-    let vehicles = get_vehicles(&access, None, None).await?;
+    let (vehicles, _) = get_vehicles(&access, None, None).await?;
     println!("got vehicle ids: {:#?}", vehicles);
 
     //  USE API ENDPOINTS ON ONE VEHICLE
@@ -51,6 +57,19 @@ async fn full_e2e_bev() -> Result<(), Box<dyn std::error::Error>> {
         .await?;
     println!("batch: {:#?}", batch);
 
+    let vin = v.vin().await?;
+    println!("vin: {:#?}", vin);
+
+    let compatibility_opts = CompatibilityOptions {
+        client_id: Some(client_id),
+        client_secret: Some(client_secret),
+        flags: None,
+    };
+
+    let compatiblity =
+        smartcar::get_compatibility(vin.0.vin.as_str(), &scope, "US", Some(compatibility_opts))
+            .await?;
+
     let attributes = v.attributes().await?;
     println!("attributes: {:#?}", attributes);
 
@@ -72,11 +91,10 @@ async fn full_e2e_bev() -> Result<(), Box<dyn std::error::Error>> {
     let tire_pressure = v.tire_pressure().await?;
     println!("tire pressure: {:#?}", tire_pressure);
 
-    let vin = v.vin().await?;
-    println!("vin: {:#?}", vin);
-
     let fuel_tank = v.fuel_tank().await;
     assert!(fuel_tank.is_err());
+
+    println!("compatiblity: {:#?}", compatiblity);
 
     Ok(())
 }
@@ -89,17 +107,22 @@ async fn full_e2e_ice() -> Result<(), Box<dyn std::error::Error>> {
     let permissions = Permissions::new().add_all();
 
     // SET UP AUTH CLIENT
-    let ac = AuthClient::new(client_id, client_secret, redirect_uri, true);
+    let ac = AuthClient::new(
+        client_id.as_str(),
+        client_secret.as_str(),
+        redirect_uri.as_str(),
+        true,
+    );
     let get_auth_url_options = AuthUrlOptionsBuilder::new().set_force_prompt(true);
 
     // GET ACCESS TOKEN
-    let url = ac.get_auth_url(permissions, get_auth_url_options);
+    let url = ac.get_auth_url(&permissions, get_auth_url_options);
     let code = helpers::run_connect_flow(url.as_str(), "BUICK", "4444").await?;
-    let access = ac.exchange_code(code.as_str()).await?;
+    let (access, _) = ac.exchange_code(code.as_str()).await?;
     let access_token = access.access_token.as_str();
 
     // GET VEHICLES
-    let vehicles = get_vehicles(&access, None, None).await?;
+    let (vehicles, _) = get_vehicles(&access, None, None).await?;
     println!("got vehicle ids: {:#?}", vehicles);
 
     // USE API ENDPOINTS ON ONE VEHICLE

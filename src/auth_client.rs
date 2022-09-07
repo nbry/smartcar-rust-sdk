@@ -147,5 +147,7 @@ fn get_auth_url() {
     let options = AuthUrlOptionsBuilder::new();
     let auth_url = ac.get_auth_url(&permissions, options);
 
-    println!("{}", auth_url);
+    let expecting =String::from("https://connect.smartcar.com/oauth/authorize?scope=read_engine_oil read_battery read_charge control_charge read_thermometer read_fuel read_location control_security read_odometer read_tires read_vehicle_info read_vin&response_type=code&client_id=test-client-id&client_secret=test-client-secret&redirect_uri=test.com&mode=test");
+
+    assert_eq!(auth_url, expecting);
 }

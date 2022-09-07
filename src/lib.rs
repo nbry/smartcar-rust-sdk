@@ -67,29 +67,18 @@ pub async fn get_compatibility(
     let mut client_secret = env::var("SMARTCAR_CLIENT_SECRET");
     let url = format!("{}/v2.0/compatibility", helpers::get_api_url());
 
-    println!("vin: {}", vin);
-
-    let s = scope.query_value();
-    println!("scope: {}", s);
-
-    println!("country {}", country);
-
     let mut req = SmartcarRequestBuilder::new(url, HttpVerb::GET)
         .add_query("vin", vin)
-        .add_query("scope", s.as_str())
+        .add_query("scope", scope.query_value().as_str())
         .add_query("country", country);
-
-    println!("{:#?}", req);
 
     if let Some(opts) = options {
         if let Some(flags) = opts.flags {
             req = req.add_query("flags", helpers::format_flag_query(&flags).as_str());
         };
-
         if let Some(id) = opts.client_id {
             client_id = Ok(id);
         };
-
         if let Some(secret) = opts.client_secret {
             client_secret = Ok(secret);
         };
@@ -99,22 +88,16 @@ pub async fn get_compatibility(
         Err(_) =>return Err(error::Error::MissingParameters("compatibility::client id must be passed as an env variable (SMARTCAR_CLIENT_ID) OR via CompatibilityOptionsBuilder".to_string())),
         Ok(v) => v,
     };
-
     let secret = match client_secret {
         Err(_) => return Err(error::Error::MissingParameters("compatibility::client secret must be passed as an env variable (SMARTCAR_CLIENT_SECRET) OR via CompatibilityOptionsBuilder".to_string())),
         Ok(v) => v,
     };
 
-    println!("client id: {}", id);
-    println!("client secret: {}", secret);
-
-    let header = request::get_basic_b64_auth_header(id.as_str(), secret.as_str());
-    println!("header: {}", header);
-
-    println!("{:#?}", req);
-
     let (res, meta) = req
-        .add_header("Authorization", header.as_str())
+        .add_header(
+            "Authorization",
+            request::get_basic_b64_auth_header(id.as_str(), secret.as_str()).as_str(),
+        )
         .send()
         .await?;
 

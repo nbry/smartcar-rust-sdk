@@ -34,10 +34,21 @@ pub(crate) fn format_flag_query(flags: &HashMap<String, String>) -> String {
         let value = flags.get(flag);
 
         if let Some(v) = value {
-            let flag_formatted = format!("{}:{}", flag, v);
+            let flag_formatted = format!("{}:{} ", flag, v);
             query.push_str(flag_formatted.as_str());
         };
     });
 
-    query
+    query.trim_end().to_string()
+}
+
+#[test]
+fn formatting_flag_query() {
+    let mut flags = HashMap::new();
+    flags.insert(String::from("black"), String::from("flag"));
+    flags.insert(String::from("good"), String::from("band"));
+
+    let flag_query = format_flag_query(&flags);
+    let expecting = "black:flag good:band";
+    assert_eq!(flag_query, expecting.to_string());
 }

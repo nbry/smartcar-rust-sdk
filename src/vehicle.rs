@@ -1,7 +1,7 @@
 use serde_json::json;
 
 use crate::error::Error;
-use crate::helpers;
+use crate::helpers::get_api_url;
 use crate::request::{get_bearer_token_header, HttpVerb, SmartcarRequestBuilder};
 use crate::response::batch::{build_batch_request_body, Batch};
 use crate::response::meta::Meta;
@@ -16,15 +16,6 @@ use crate::response::{
 pub enum UnitSystem {
     Imperial,
     Metric,
-}
-
-impl UnitSystem {
-    fn as_str(&self) -> &'static str {
-        match self {
-            UnitSystem::Imperial => "imperial",
-            UnitSystem::Metric => "metric",
-        }
-    }
 }
 
 /// A vehicle instance, for making requests to Smartcar API
@@ -47,7 +38,7 @@ impl Vehicle {
     fn request(&self, path: &str, verb: HttpVerb) -> SmartcarRequestBuilder {
         let url = format!(
             "{api_url}/v2.0/vehicles/{id}{path}",
-            api_url = helpers::get_api_url(),
+            api_url = get_api_url(),
             id = self.id,
             path = path
         );

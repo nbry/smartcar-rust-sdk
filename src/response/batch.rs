@@ -35,7 +35,7 @@ pub(crate) fn build_batch_request_body(paths: Vec<String>) -> Result<Value, Erro
     Ok(serde_json::to_value(&batch_request_body)?)
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Debug, Deserialize, Serialize)]
 #[serde(untagged)]
 pub enum SmartcarResponseBody {
     ApplicationPermissions(ApplicationPermissions),
@@ -55,7 +55,7 @@ pub enum SmartcarResponseBody {
 /// Individual response in a batch response body
 ///
 /// [More info on batch](https://smartcar.com/api#post-batch-request)
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct BatchResponse {
     path: String,
     body: SmartcarResponseBody,
@@ -67,7 +67,7 @@ pub struct BatchResponse {
 /// sending a batch request
 ///
 /// [More info on batch](https://smartcar.com/api#post-batch-request)
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct Batch {
     responses: Vec<BatchResponse>,
 }

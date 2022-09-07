@@ -76,13 +76,6 @@ impl SmartcarRequestBuilder {
         self
     }
 
-    pub(crate) fn add_queries(mut self, qs: Vec<(&str, &str)>) -> Self {
-        for q in qs {
-            self.request = self.request.query(&q);
-        }
-        self
-    }
-
     pub(crate) fn add_query(mut self, query: &str, value: &str) -> Self {
         self.request = self.request.query(&[(query, value)]);
         self

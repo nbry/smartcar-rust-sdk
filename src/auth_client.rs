@@ -1,14 +1,126 @@
-use crate::helpers::{get_connect_url, get_oauth_url};
-use crate::permission::Permissions;
+use crate::helpers::{format_flag_query, get_connect_url, get_oauth_url};
 use crate::request::{MultiQuery, SmartcarRequestBuilder};
 use crate::response::meta::Meta;
 use crate::response::Access;
+use crate::ScopeBuilder;
 use crate::{error, request};
 
 use std::{collections::HashMap, env};
 
-pub mod auth_url_options;
-use self::auth_url_options::AuthUrlOptionsBuilder;
+pub struct AuthUrlOptionsBuilder {
+    force_prompt: Option<bool>,
+    state: Option<String>,
+    make_bypass: Option<String>,
+    single_select: Option<bool>,
+    single_select_by_vin: Option<String>,
+    flags: Option<HashMap<String, String>>,
+}
+
+impl AuthUrlOptionsBuilder {
+    pub fn new() -> AuthUrlOptionsBuilder {
+        AuthUrlOptionsBuilder {
+            force_prompt: None,
+            state: None,
+            make_bypass: None,
+            single_select_by_vin: None,
+            single_select: None,
+            flags: None,
+        }
+    }
+
+    pub fn set_force_prompt(mut self, enabled: bool) -> Self {
+        self.force_prompt = Some(enabled);
+        self
+    }
+
+    pub fn set_state(mut self, state: String) -> Self {
+        self.state = Some(state);
+        self
+    }
+
+    pub fn set_make_bypass(mut self, make: String) -> Self {
+        self.make_bypass = Some(make);
+        self
+    }
+
+    pub fn set_single_select(mut self, enabled: bool) -> Self {
+        self.single_select = Some(enabled);
+        self
+    }
+
+    pub fn set_single_select_by_vin(mut self, vin: String) -> Self {
+        self.single_select_by_vin = Some(vin);
+        self
+    }
+
+    pub fn set_flags(mut self, flags: &HashMap<String, String>) -> Self {
+        self.flags = Some(flags.to_owned());
+        self
+    }
+}
+
+impl MultiQuery for AuthUrlOptionsBuilder {
+    fn vectorize(&self) -> Vec<(String, String)> {
+        let mut query_string = Vec::new();
+
+        if let Some(enabled) = self.force_prompt {
+            if enabled == true {
+                query_string.push(("approval_prompt".to_string(), "force".to_string()));
+            }
+        };
+
+        if let Some(state) = &self.state {
+            query_string.push(("state".to_string(), state.to_owned()));
+        }
+
+        if let Some(make) = &self.make_bypass {
+            query_string.push(("make".to_string(), make.to_owned()));
+        }
+
+        if let Some(flags) = &self.flags {
+            let flag_query = format_flag_query(flags);
+            query_string.push(("flag".to_string(), flag_query.to_owned()));
+        }
+
+        match &self.single_select_by_vin {
+            Some(vin) => {
+                query_string.push(("single_select_vin".to_string(), vin.to_owned()));
+                query_string.push(("single_select".to_string(), "true".to_string()));
+            }
+            None => {
+                if let Some(enabled) = &self.single_select {
+                    query_string.push(("single_select".to_string(), enabled.to_string()));
+                }
+            }
+        }
+        query_string
+    }
+}
+
+#[test]
+fn get_auth_url_options_query_build() {
+    let options = AuthUrlOptionsBuilder::new()
+        .set_make_bypass("mercedes".to_string())
+        .set_state("no-michael-no-no-michael".to_string())
+        .set_single_select_by_vin("THATISSONOTRIGHT".to_string())
+        .set_force_prompt(true);
+
+    let query = options.vectorize();
+
+    let expecting = vec![
+        ("approval_prompt".to_string(), "force".to_string()),
+        ("state".to_string(), "no-michael-no-no-michael".to_string()),
+        ("make".to_string(), "mercedes".to_string()),
+        (
+            "single_select_vin".to_string(),
+            "THATISSONOTRIGHT".to_string(),
+        ),
+        ("single_select".to_string(), "true".to_string()),
+    ];
+
+    // O(n^2)... "shrugs"
+    assert!(query.iter().all(|q| expecting.contains(q)));
+}
 
 /// Smartcar OAuth client for your application
 ///
@@ -70,22 +182,15 @@ impl AuthClient {
     /// Generate the Smartcar Connect URL
     ///
     /// More info on [Smartcar Connect](https://smartcar.com/api#smartcar-connect)
-    pub fn get_auth_url(
-        &self,
-        permissions: &Permissions,
-        options: AuthUrlOptionsBuilder,
-    ) -> String {
+    pub fn get_auth_url(&self, scope: &ScopeBuilder, options: AuthUrlOptionsBuilder) -> String {
         let mut url = get_connect_url();
 
         url.push_str("/oauth/authorize?scope=");
-        url.push_str(permissions.query_value().as_str());
-
+        url.push_str(scope.query_value().as_str());
         url.push_str("&response_type=code&");
-
         url.push_str(self.multi_query().as_str());
 
         let options_query = options.multi_query();
-
         if options_query.len() > 0 {
             if !options_query.contains("approval_prompt") {
                 url.push_str("&approval_prompt=auto");
@@ -143,11 +248,17 @@ impl MultiQuery for AuthClient {
 #[test]
 fn get_auth_url() {
     let ac = AuthClient::new("test-client-id", "test-client-secret", "test.com", true);
-    let permissions = Permissions::new().add_all();
+    let scope = ScopeBuilder::with_all_permissions();
     let options = AuthUrlOptionsBuilder::new();
-    let auth_url = ac.get_auth_url(&permissions, options);
+    let auth_url = ac.get_auth_url(&scope, options);
 
     let expecting =String::from("https://connect.smartcar.com/oauth/authorize?scope=read_engine_oil read_battery read_charge control_charge read_thermometer read_fuel read_location control_security read_odometer read_tires read_vehicle_info read_vin&response_type=code&client_id=test-client-id&client_secret=test-client-secret&redirect_uri=test.com&mode=test");
 
     assert_eq!(auth_url, expecting);
+}
+
+#[test]
+#[should_panic]
+fn create_auth_client_without_env_variables() {
+    AuthClient::from_env(true);
 }

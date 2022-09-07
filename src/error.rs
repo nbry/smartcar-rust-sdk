@@ -1,4 +1,4 @@
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
 #[derive(Debug, thiserror::Error)]
@@ -19,7 +19,7 @@ pub enum Error {
     SmartcarError(SmartcarError),
 }
 
-#[derive(Debug, Deserialize, thiserror::Error)]
+#[derive(Debug, Deserialize, Serialize, thiserror::Error)]
 #[serde(rename_all = "camelCase")]
 #[error("{error_type}::{description}")]
 pub struct SmartcarError {

@@ -1,19 +1,20 @@
 use serial_test::serial;
 use smartcar::{
-    auth_client::{auth_url_options::AuthUrlOptionsBuilder, AuthClient},
+    auth_client::{AuthClient, AuthUrlOptionsBuilder},
     get_vehicles,
-    permission::Permissions,
     vehicle::Vehicle,
-    CompatibilityOptions,
+    CompatibilityOptions, ScopeBuilder,
 };
+
+use crate::helpers::{get_creds_from_env, run_connect_flow};
 
 mod helpers;
 
 #[tokio::test]
 #[serial]
 async fn full_e2e_bev() -> Result<(), Box<dyn std::error::Error>> {
-    let (client_id, client_secret, redirect_uri) = helpers::get_creds_from_env();
-    let scope = Permissions::new().add_all();
+    let (client_id, client_secret, redirect_uri) = get_creds_from_env();
+    let scope = ScopeBuilder::with_all_permissions();
 
     // SET UP AUTH CLIENT
     let ac = AuthClient::new(
@@ -26,7 +27,7 @@ async fn full_e2e_bev() -> Result<(), Box<dyn std::error::Error>> {
 
     // GET ACCESS TOKEN
     let url = ac.get_auth_url(&scope, get_auth_url_options);
-    let code = helpers::run_connect_flow(url.as_str(), "TESLA", "4444").await?;
+    let code = run_connect_flow(url.as_str(), "TESLA", "4444").await?;
     let (access, _) = ac.exchange_code(code.as_str()).await?;
     let access_token = access.access_token.as_str();
 
@@ -103,8 +104,8 @@ async fn full_e2e_bev() -> Result<(), Box<dyn std::error::Error>> {
 #[serial]
 async fn full_e2e_ice() -> Result<(), Box<dyn std::error::Error>> {
     println!("===================");
-    let (client_id, client_secret, redirect_uri) = helpers::get_creds_from_env();
-    let permissions = Permissions::new().add_all();
+    let (client_id, client_secret, redirect_uri) = get_creds_from_env();
+    let scope = ScopeBuilder::with_all_permissions();
 
     // SET UP AUTH CLIENT
     let ac = AuthClient::new(
@@ -116,8 +117,8 @@ async fn full_e2e_ice() -> Result<(), Box<dyn std::error::Error>> {
     let get_auth_url_options = AuthUrlOptionsBuilder::new().set_force_prompt(true);
 
     // GET ACCESS TOKEN
-    let url = ac.get_auth_url(&permissions, get_auth_url_options);
-    let code = helpers::run_connect_flow(url.as_str(), "BUICK", "4444").await?;
+    let url = ac.get_auth_url(&scope, get_auth_url_options);
+    let code = run_connect_flow(url.as_str(), "BUICK", "4444").await?;
     let (access, _) = ac.exchange_code(code.as_str()).await?;
     let access_token = access.access_token.as_str();
 

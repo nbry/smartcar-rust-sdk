@@ -10,7 +10,10 @@ pub mod vehicle;
 pub mod webhooks;
 
 use serde::Deserialize;
-use std::{collections::HashMap, env};
+use std::{
+    collections::{HashMap, HashSet},
+    env,
+};
 
 use helpers::{format_flag_query, get_api_url};
 use request::{get_bearer_token_header, HttpVerb, SmartcarRequestBuilder};
@@ -28,7 +31,6 @@ pub async fn get_vehicles(
     offset: Option<i32>,
 ) -> Result<(Vehicles, Meta), error::Error> {
     let url = format!("{api_url}/v2.0/vehicles", api_url = get_api_url().as_str());
-
     let mut req = reqwest::Client::new().get(url).header(
         "Authorization",
         get_bearer_token_header(access.access_token.as_str()),
@@ -54,6 +56,11 @@ pub struct CompatibilityOptions {
     pub flags: Option<HashMap<String, String>>,
 }
 
+/// Given a VIN, country, and a list of permissions, determine:
+/// 1. If the car is compatible with smartcar
+/// 2. If the car is capable of the endpoints associated with each permisison
+///
+/// [Compatibility API](https://smartcar.com/api#compatibility-api)
 pub async fn get_compatibility(
     vin: &str,
     scope: &ScopeBuilder,
@@ -66,7 +73,7 @@ pub async fn get_compatibility(
 
     let mut req = SmartcarRequestBuilder::new(url, HttpVerb::GET)
         .add_query("vin", vin)
-        .add_query("scope", scope.query_value().as_str())
+        .add_query("scope", scope.query_value.as_str())
         .add_query("country", country);
 
     if let Some(opts) = options {
@@ -109,11 +116,15 @@ pub async fn get_compatibility(
     Ok((data, meta))
 }
 
+////////////////////////
+/// PERMISSION/SCOPE ///
+////////////////////////
+
 /// # Smartcar Permission
 ///
 /// A permission that your application is requesting
 /// access to during SmartcarConnect
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Eq, PartialEq, Hash)]
 pub enum Permission {
     ReadEngineOil,   // Read vehicle engine oil health
     ReadBattery,     // Read EV battery's capacity and state of charge
@@ -129,29 +140,58 @@ pub enum Permission {
     ReadVin,         // Read VIN
 }
 
-/// # Scopes builder
-#[derive(Deserialize, Debug)]
-pub struct ScopeBuilder {
-    permissions: Vec<Permission>,
+impl Permission {
+    fn as_str(&self) -> &str {
+        match self {
+            Permission::ReadEngineOil => "read_engine_oil",
+            Permission::ReadBattery => "read_battery",
+            Permission::ReadCharge => "read_charge",
+            Permission::ControlCharge => "control_charge",
+            Permission::ReadThermometer => "read_thermometer",
+            Permission::ReadFuel => "read_fuel",
+            Permission::ReadLocation => "read_location",
+            Permission::ControlSecurity => "control_security",
+            Permission::ReadOdometer => "read_odometer",
+            Permission::ReadTires => "read_tires",
+            Permission::ReadVehicleInfo => "read_vehicle_info",
+            Permission::ReadVin => "read_vin",
+        }
+    }
 }
 
 /// Builder for adding permissions to your app
+#[derive(Deserialize, Debug)]
+pub struct ScopeBuilder {
+    permissions: HashSet<Permission>,
+    query_value: String,
+}
+
 impl ScopeBuilder {
-    /// Create a new Permissions builder
     pub fn new() -> ScopeBuilder {
         ScopeBuilder {
-            permissions: Vec::new(),
+            permissions: HashSet::new(),
+            query_value: String::from(""),
         }
     }
 
-    pub fn add_permission(mut self, permission: Permission) -> Self {
-        self.permissions.push(permission);
+    /// Create a ScopeBuilder with ALL the permissions
+    pub fn add_permission(mut self, p: Permission) -> Self {
+        if !self.permissions.contains(&p) {
+            if self.query_value.len() != 0 {
+                self.query_value.push_str(" ");
+            };
+
+            self.query_value.push_str(p.as_str());
+            self.permissions.insert(p);
+        }
         self
     }
 
+    /// Create a ScopeBuilder with all available permissions
     pub fn with_all_permissions() -> ScopeBuilder {
         ScopeBuilder {
-            permissions: Vec::new(),
+            permissions: HashSet::new(),
+            query_value: String::from(""),
         }
         .add_permission(Permission::ReadEngineOil)
         .add_permission(Permission::ReadBattery)
@@ -166,34 +206,6 @@ impl ScopeBuilder {
         .add_permission(Permission::ReadVehicleInfo)
         .add_permission(Permission::ReadVin)
     }
-
-    pub(crate) fn query_value(&self) -> String {
-        let mut query_value = String::from("");
-
-        for p in self.permissions.iter() {
-            query_value.push_str(get_query_param_for_permission(p));
-            query_value.push_str(" ");
-        }
-
-        query_value.trim().to_string()
-    }
-}
-
-fn get_query_param_for_permission(permission: &Permission) -> &str {
-    match permission {
-        Permission::ReadEngineOil => "read_engine_oil",
-        Permission::ReadBattery => "read_battery",
-        Permission::ReadCharge => "read_charge",
-        Permission::ControlCharge => "control_charge",
-        Permission::ReadThermometer => "read_thermometer",
-        Permission::ReadFuel => "read_fuel",
-        Permission::ReadLocation => "read_location",
-        Permission::ControlSecurity => "control_security",
-        Permission::ReadOdometer => "read_odometer",
-        Permission::ReadTires => "read_tires",
-        Permission::ReadVehicleInfo => "read_vehicle_info",
-        Permission::ReadVin => "read_vin",
-    }
 }
 
 #[test]
@@ -204,5 +216,5 @@ fn test_getting_scope_url_params_string() {
         .add_permission(Permission::ReadVin);
 
     let expecting = "read_engine_oil read_fuel read_vin";
-    assert_eq!(permissions.query_value(), expecting);
+    assert_eq!(permissions.query_value.as_str(), expecting);
 }

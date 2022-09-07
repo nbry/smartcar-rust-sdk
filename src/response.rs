@@ -108,15 +108,15 @@ pub struct Disconnect {
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Capability {
-    permission: String,
-    endpoint: String,
-    capable: bool,
-    reason: Option<String>,
+    pub permission: String,
+    pub endpoint: String,
+    pub capable: bool,
+    pub reason: Option<String>,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Compatibility {
-    compatible: bool,
-    reason: Option<String>,
-    capabilities: Vec<Capability>,
+    pub compatible: bool,
+    pub reason: Option<String>,
+    pubcapabilities: Vec<Capability>,
 }

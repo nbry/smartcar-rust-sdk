@@ -186,7 +186,7 @@ impl AuthClient {
         let mut url = get_connect_url();
 
         url.push_str("/oauth/authorize?scope=");
-        url.push_str(scope.query_value().as_str());
+        url.push_str(scope.query_value.as_str());
         url.push_str("&response_type=code&");
         url.push_str(self.multi_query().as_str());
 

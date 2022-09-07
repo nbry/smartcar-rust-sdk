@@ -49,6 +49,9 @@ fn formatting_flag_query() {
     flags.insert(String::from("good"), String::from("band"));
 
     let flag_query = format_flag_query(&flags);
-    let expecting = "black:flag good:band";
-    assert_eq!(flag_query, expecting.to_string());
+
+    // Order not preserved
+    assert!(flag_query.contains("black:flag"));
+    assert!(flag_query.contains(" "));
+    assert!(flag_query.contains("good:band"));
 }

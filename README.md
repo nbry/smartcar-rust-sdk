@@ -49,7 +49,7 @@ smartcar = "0.1.0"
 - Use `<AuthClient>.exchange_refresh_token` on your saved `refresh_token` to retrieve a new token
   when your `accessToken` expires.
 
-## Getting Started
+## Getting Started - see in ./examples/
 
 ```rust
 use axum::extract::Query;

@@ -18,15 +18,8 @@
 //! Before integrating with Smartcar's SDK, you'll need to register an application in the
 //! [Smartcar Developer portal](https://developer.smartcar.com). If you do not have access
 //! to the dashboard, please [request access](https://smartcar.com/subscribe).
-
 pub(crate) mod helpers;
-
-pub mod auth_client;
-pub mod error;
-pub mod request;
-pub mod response;
-pub mod vehicle;
-pub mod webhooks;
+pub(crate) mod request;
 
 use serde::Deserialize;
 use std::{
@@ -37,6 +30,12 @@ use std::{
 use helpers::{format_flag_query, get_api_url};
 use request::{get_bearer_token_header, HttpVerb, SmartcarRequestBuilder};
 use response::{meta, Access, Compatibility, Meta, User, Vehicles};
+
+pub mod auth_client;
+pub mod error;
+pub mod response;
+pub mod vehicle;
+pub mod webhooks;
 
 /// Return the id of the vehicle owner who granted access to your application.
 ///

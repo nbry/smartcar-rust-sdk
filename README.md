@@ -51,7 +51,7 @@ smartcar = "0.1.0"
 
 ## Getting Started
 
-```
+```rust
 use axum::extract::Query;
 use axum::http::StatusCode;
 use axum::response::{IntoResponse, Redirect};

@@ -1,4 +1,4 @@
-# Smartcar Rust SDK - Beta
+# Smartcar Rust SDK
 
 [![Crate](https://img.shields.io/crates/v/smartcar.svg)](https://crates.io/crates/smartcar)
 [![Documentation](https://docs.rs/smartcar/badge.svg)](https://docs.rs/smartcar)
@@ -27,7 +27,7 @@ Add this to your `Cargo.toml`:
 
 ```
 [dependencies]
-smartcar = "0.1.1-beta.1"
+smartcar = "0.1.0"
 ```
 
 ## Flow

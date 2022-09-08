@@ -3,7 +3,7 @@
 [![Crate](https://img.shields.io/crates/v/smartcar.svg)](https://crates.io/crates/smartcar)
 [![Documentation](https://docs.rs/smartcar/badge.svg)](https://docs.rs/smartcar)
 
-Rust crate for Smartcar API
+Rust library crate for sending requests to Smartcar API
 
 ## Overview
 
@@ -20,6 +20,8 @@ The Smartcar Rust SDK provides methods to:
    vehicles using the access token obtained in step 2.
 
 Before integrating with Smartcar's SDK, you'll need to register an application in the [Smartcar Developer portal](https://developer.smartcar.com). If you do not have access to the dashboard, please [request access](https://smartcar.com/subscribe).
+
+Note that the Rust SDK only supports version 2.0 of Smartcar API.
 
 ## Installation
 

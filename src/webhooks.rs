@@ -1,3 +1,5 @@
+//! Helpers for integrating webhooks with your application
+
 use hex;
 use hmac::{Hmac, Mac};
 use sha2::Sha256;

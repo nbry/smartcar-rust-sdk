@@ -1,3 +1,7 @@
+//! These structs are representations of the response body
+//! after sending a request
+//! to Smartcar API
+
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
@@ -180,13 +184,29 @@ pub struct Action {
     pub status: String,
 }
 
-/// Contains the status after revoking access to the vehicle
+/// Contains the status after sending a DELETE request.
+///
+/// This includes:
+/// - disconnecting a vehicle from an application
+/// - unsubscribing a vehicle from a webhook
 ///
 /// This is the struct representation for the response body of
-/// **DELETE** `https://api.smartcar.com/v2.0/vehicles/{id}/application`
+/// **DELETE** `https://api.smartcar.com/v2.0/vehicles/{id}/application` or
+/// **DELETE** `https://api.smartcar.com/v2.0/vehicles/{id}/webhooks/{webhookId}` or
 #[derive(Debug, Deserialize, Serialize)]
-pub struct Disconnect {
+pub struct Status {
     pub status: String,
+}
+
+/// Contains the information about a webhook upon subscribing a vehicle to one
+///
+/// This is the struct representation for the response body of
+/// **POST** https://api.smartcar.com/v2.0/vehicles/{id}/webhooks/{webhookId}`
+#[derive(Debug, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Subscribe {
+    pub webhook_id: String,
+    pub vehicle_id: String,
 }
 
 /// Contains information about whether the vehicle is capable of

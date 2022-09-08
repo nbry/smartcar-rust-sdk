@@ -14,8 +14,7 @@ pub(crate) trait MultiQuery {
     /// Build a string with multiple query/value pairs
     ///
     /// Note, the beginning of this string will NOT include
-    /// the "?" (if it's the first query in the URL),
-    /// nor will it include an "&"
+    /// an "?" or "&" in the beginning or end.
     fn multi_query(&self) -> String {
         let mut query_string = String::from("");
         let query_vec = self.vectorize();

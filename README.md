@@ -14,10 +14,8 @@ To make requests to a vehicle from a web or mobile application, the end user mus
 The Smartcar Rust SDK provides methods to:
 
 1. Generate the link to redirect to Connect.
-2. Make a request to Smartcar with the `code` obtained from Connect to obtain an
-   access and refresh token
-3. Make requests to the Smartcar API to read vehicle data and send commands to
-   vehicles using the access token obtained in step 2.
+2. Make a request to Smartcar with the `code` obtained from Connect to obtain an access and refresh token
+3. Make requests to the Smartcar API to read vehicle data and send commands to vehicles using the access token obtained in step 2.
 
 Before integrating with Smartcar's SDK, you'll need to register an application in the [Smartcar Developer portal](https://developer.smartcar.com). If you do not have access to the dashboard, please [request access](https://smartcar.com/subscribe).
 
@@ -29,7 +27,7 @@ Add this to your `Cargo.toml`:
 
 ```
 [dependencies]
-smartcar = "0.1.3"
+smartcar = "0.1.4"
 ```
 
 ## Flow
@@ -52,8 +50,6 @@ smartcar = "0.1.3"
 *\* In order to make subsequent requests, you will need to save this access struct somewhere.*
 
 *\*\* When your access token expires, use `<AuthClient>.exchange_refresh_token` to get new tokens*
-
-
 
 ## Getting Started
 

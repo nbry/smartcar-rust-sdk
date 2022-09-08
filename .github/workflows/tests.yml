@@ -15,6 +15,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    - uses: actions/checkout@v3
     - uses: browser-actions/setup-geckodriver@latest
     - name: Run tests
       run: geckodriver& E2E_SMARTCAR_CLIENT_ID=${{secrets.E2E_SMARTCAR_CLIENT_ID}} E2E_SMARTCAR_CLIENT_SECRET=${{secrets.E2E_SMARTCAR_CLIENT_SECRET}} E2E_SMARTCAR_REDIRECT_URI=${{secrets.E2E_SMARTCAR_REDIRECT_URI}} cargo test -- --nocapture

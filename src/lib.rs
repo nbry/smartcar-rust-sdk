@@ -200,7 +200,7 @@ impl Permission {
 /// Builder of a list of permissions
 #[derive(Deserialize, Debug)]
 pub struct ScopeBuilder {
-    permissions: HashSet<Permission>,
+    pub permissions: HashSet<Permission>,
     query_value: String,
 }
 

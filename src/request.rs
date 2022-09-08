@@ -11,11 +11,11 @@ pub(crate) trait MultiQuery {
     /// Build a vector of multiple query/value tuples
     fn vectorize(&self) -> Vec<(String, String)>;
 
-    /// Build a string with multiple query values, minus the
+    /// Build a string with multiple query/value pairs
     ///
     /// Note, the beginning of this string will NOT include
-    /// the "?" (if it's the first query in the URL)
-    /// OR the "&" beginnging/ending (if it proceeds another query)
+    /// the "?" (if it's the first query in the URL),
+    /// nor will it include an "&"
     fn multi_query(&self) -> String {
         let mut query_string = String::from("");
         let query_vec = self.vectorize();

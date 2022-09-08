@@ -11,12 +11,12 @@ use std::{collections::HashMap, env};
 ///
 /// [Info about Smartcar Connect ](https://smartcar.com/docs/api/#smartcar-connect)
 pub struct AuthUrlOptionsBuilder {
-    force_prompt: Option<bool>,
-    state: Option<String>,
-    make_bypass: Option<String>,
-    single_select: Option<bool>,
-    single_select_by_vin: Option<String>,
-    flags: Option<HashMap<String, String>>,
+    pub force_prompt: Option<bool>,
+    pub state: Option<String>,
+    pub make_bypass: Option<String>,
+    pub single_select: Option<bool>,
+    pub single_select_by_vin: Option<String>,
+    pub flags: Option<HashMap<String, String>>,
 }
 
 impl AuthUrlOptionsBuilder {
@@ -163,6 +163,7 @@ fn get_auth_url_options_query_build() {
 /// to get these fields.
 ///
 /// Login/Signup for a Smartcar account here [here](https://smartcar.com/subscribe)
+#[derive(Debug)]
 pub struct AuthClient {
     /// The application’s unique identifier, obtained
     pub client_id: String,

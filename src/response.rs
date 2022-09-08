@@ -6,6 +6,7 @@ use crate::error::SmartcarError;
 pub mod batch;
 pub mod meta;
 
+/// Contains tokens for authenticating API requests
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Access {
     pub access_token: String,

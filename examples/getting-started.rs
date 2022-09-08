@@ -11,12 +11,25 @@ use smartcar::response::{Meta, VehicleAttributes};
 use smartcar::vehicle::Vehicle;
 use smartcar::{Permission, ScopeBuilder};
 
+#[tokio::main]
+async fn main() {
+    let app = Router::new()
+        .route("/login", get(login))
+        .route("/callback", get(callback));
+
+    // run on localhost:3000
+    axum::Server::bind(&"0.0.0.0:3000".parse().unwrap())
+        .serve(app.into_make_service())
+        .await
+        .unwrap();
+}
+
 /// Helper for creating an Auth Client instance with your credentials
 fn get_auth_client() -> smartcar::auth_client::AuthClient {
     smartcar::auth_client::AuthClient::new(
-        "REPLACE-WITH-YOUR-SMARTCAR-CLIENT-ID",
-        "REPLACE-WITH-YOUR-SMARTCAR-CLIENT-SECRET",
-        "REPLACE-WITH-YOUR-SMARTCAR-REDIRECT-URI.COM",
+        "REPLACE_WITH_YOUR_SMARTCAR_CLIENT_ID",
+        "REPLACE_WITH_YOUR_SMARTCAR_CLIENT_SECRET",
+        "REPLACE_WITH_YOUR_SMARTCAR_REDIRECT_URI.COM",
         true,
     )
 }
@@ -40,37 +53,37 @@ struct Callback {
 // Handle Smartcar callback with auth code
 #[axum_macros::debug_handler]
 async fn callback(q: Query<Callback>) -> impl IntoResponse {
+    // If user denies you access, you'll see this
     if let Some(_) = &q.error {
         return (
             StatusCode::EXPECTATION_FAILED,
-            Json(json!("User declined auth")),
+            Json(json!("User delined during Smartcar Connect")),
         );
     };
 
     let code = &q.code.to_owned().unwrap();
-    let res = get_attributes_handler(code.as_str()).await;
+    let res = get_attributes(&code).await;
 
-    // If user denies you access, you'll see this
-    let (attributes, meta) = match res {
+    match res {
         Err(_) => {
             return (
                 StatusCode::EXPECTATION_FAILED,
-                Json(json!("User delined during Smartcar Connect")),
+                Json(json!("attributes request failed")),
             )
         }
-        Ok((a, m)) => (a, m),
-    };
+        Ok((attributes, meta)) => {
+            println!("Information about the request itself:\n\n{:#?}", meta);
+            println!("The vehicle's id, make, model, year:\n\n{:#?}", attributes);
 
-    println!("Information about the request itself:\n\n{:#?}", meta);
-    println!("Vehicle's id, make, model, year:\n\n{:#?}", attributes);
-
-    (
-        StatusCode::OK,
-        Json(json!(attributes)), // please help me make this better... lol
-    )
+            (
+                StatusCode::OK,
+                Json(json!(attributes)), // please help me make this better... lol
+            )
+        }
+    }
 }
 
-async fn get_attributes_handler(
+async fn get_attributes(
     auth_code: &str,
 ) -> Result<(VehicleAttributes, Meta), smartcar::error::Error> {
     let client = get_auth_client();
@@ -88,17 +101,4 @@ async fn get_attributes_handler(
     let (attributes, meta) = vehicle.attributes().await?;
 
     Ok((attributes, meta))
-}
-
-#[tokio::main]
-async fn main() {
-    let app = Router::new()
-        .route("/login", get(login))
-        .route("/callback", get(callback));
-
-    // run it with hyper on localhost:3000
-    axum::Server::bind(&"0.0.0.0:3000".parse().unwrap())
-        .serve(app.into_make_service())
-        .await
-        .unwrap();
 }

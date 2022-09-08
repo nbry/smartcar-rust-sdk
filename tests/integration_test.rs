@@ -34,13 +34,10 @@ async fn full_e2e_bev() -> Result<(), Box<dyn std::error::Error>> {
     let (user, _) = get_user(&access).await?;
     println!("got user id: {:#?}", user);
 
-    // GET VEHICLES
+    // GET VEHICLES & ISOLATE FIRST VEHICLE
     let (vehicles, _) = get_vehicles(&access, None, None).await?;
     println!("got vehicle ids: {:#?}", vehicles);
-
-    //  USE API ENDPOINTS ON ONE VEHICLE
-    let id_of_first_vehicle = vehicles.vehicles[0].as_str();
-    let v = Vehicle::new(id_of_first_vehicle, access_token);
+    let v = Vehicle::new(&vehicles.vehicles[0], access_token);
     println!("using first vehicle: {:#?}", v);
 
     let permissions = v.permissions().await?;
@@ -52,27 +49,8 @@ async fn full_e2e_bev() -> Result<(), Box<dyn std::error::Error>> {
     let lock = v.lock().await?;
     println!("lock: {:#?}", lock);
 
-    let batch = v
-        .batch(vec![
-            "/odometer".to_string(),
-            "/charge".to_string(),
-            "/fuel".to_string(), // should error
-        ])
-        .await?;
-    println!("batch: {:#?}", batch);
-
     let vin = v.vin().await?;
     println!("vin: {:#?}", vin);
-
-    let compatibility_opts = CompatibilityOptions {
-        client_id: Some(client_id),
-        client_secret: Some(client_secret),
-        flags: None,
-    };
-
-    let compatiblity =
-        smartcar::get_compatibility(vin.0.vin.as_str(), &scope, "US", Some(compatibility_opts))
-            .await?;
 
     let attributes = v.attributes().await?;
     println!("attributes: {:#?}", attributes);
@@ -98,6 +76,24 @@ async fn full_e2e_bev() -> Result<(), Box<dyn std::error::Error>> {
     let fuel_tank = v.fuel_tank().await;
     assert!(fuel_tank.is_err());
 
+    let batch = v
+        .batch(vec![
+            "/odometer".to_string(),
+            "/charge".to_string(),
+            "/fuel".to_string(), // should error
+        ])
+        .await?;
+    println!("batch: {:#?}", batch);
+
+    let compatibility_opts = CompatibilityOptions {
+        client_id: Some(client_id),
+        client_secret: Some(client_secret),
+        flags: None,
+    };
+
+    let compatiblity =
+        smartcar::get_compatibility(vin.0.vin.as_str(), &scope, "US", Some(compatibility_opts))
+            .await?;
     println!("compatiblity: {:#?}", compatiblity);
 
     Ok(())
@@ -127,22 +123,18 @@ async fn full_e2e_ice() -> Result<(), Box<dyn std::error::Error>> {
     // TRY A REFRESH TOKEN EXCHANGE
     let refresh_token = access.refresh_token.as_str();
     let (new_access, _) = ac.exchange_refresh_token(refresh_token).await?;
-    let access_token = new_access.access_token.as_str();
+    let access_token = new_access.access_token;
 
-    // GET VEHICLES
+    // GET VEHICLES & ISOLATE FIRST VEHICLE
     let (vehicles, _) = get_vehicles(&access, None, None).await?;
-    println!("got vehicle ids: {:#?}", vehicles);
-
-    // USE API ENDPOINTS ON ONE VEHICLE
-    let id_of_first_vehicle = vehicles.vehicles[1].as_str();
-    let v = Vehicle::new(id_of_first_vehicle, access_token);
+    let v = Vehicle::new(&vehicles.vehicles[1], &access_token);
     println!("using first vehicle: {:#?}", v);
-
-    let fuel_tank = v.fuel_tank().await?;
-    println!("fuel_tank: {:#?}", fuel_tank);
 
     let engine_oil = v.engine_oil().await?;
     println!("engine_oil: {:#?}", engine_oil);
+
+    let fuel_tank = v.fuel_tank().await?;
+    println!("fuel_tank: {:#?}", fuel_tank);
 
     Ok(())
 }

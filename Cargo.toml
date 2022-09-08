@@ -1,9 +1,9 @@
 [package]
 name = "smartcar"
-version = "0.1.2"
+version = "0.1.3"
 edition = "2021"
 license = "MIT"
-documentation= "https://github.com/nbry/smartcar-rust-sdk"
+documentation= "https://docs.rs/smartcar/latest/smartcar/"
 homepage = "https://github.com/nbry/smartcar-rust-sdk"
 repository = "https://github.com/nbry/smartcar-rust-sdk"
 description = """

@@ -27,15 +27,13 @@ Add this to your `Cargo.toml`:
 
 ```
 [dependencies]
-smartcar = "0.1.2"
+smartcar = "0.1.3"
 ```
 
 ## Flow
 
-- Create a new `AuthClient` object with your `client_id`, `client_secret`,
-  `redirectUri`.
-- Redirect the user to Smartcar Connect using `<AuthClient>.get_auth_url` with required `scope` or with one
-  of our frontend SDKs.
+- Create a new `AuthClient` struct with your `client_id`, `client_secret`, and `redirect_uri`.
+- Redirect the user to Smartcar Connect using `<AuthClient>.get_auth_url` with required `scope` or with one of our frontend SDKs.
 - The user will login, and then accept or deny your `scope`'s permissions.
 - Handle the get request to your `redirect_uri`.
   - If the user accepted your permissions:
@@ -49,7 +47,14 @@ smartcar = "0.1.2"
 - Use `<AuthClient>.exchange_refresh_token` on your saved `refresh_token` to retrieve a new token
   when your `accessToken` expires.
 
-## Getting Started - see in ./examples/
+## Getting Started
+
+The following code is in /examples. To run the code, replace the fake Smartcar credentials in
+`get_auth_client` with your own and run this command:
+
+```
+cargo run --example=getting-started
+```
 
 ```rust
 use axum::extract::Query;
@@ -64,6 +69,19 @@ use smartcar;
 use smartcar::response::{Meta, VehicleAttributes};
 use smartcar::vehicle::Vehicle;
 use smartcar::{Permission, ScopeBuilder};
+
+#[tokio::main]
+async fn main() {
+    let app = Router::new()
+        .route("/login", get(login))
+        .route("/callback", get(callback));
+
+    // run on localhost:3000
+    axum::Server::bind(&"0.0.0.0:3000".parse().unwrap())
+        .serve(app.into_make_service())
+        .await
+        .unwrap();
+}
 
 /// Helper for creating an Auth Client instance with your credentials
 fn get_auth_client() -> smartcar::auth_client::AuthClient {
@@ -94,37 +112,37 @@ struct Callback {
 // Handle Smartcar callback with auth code
 #[axum_macros::debug_handler]
 async fn callback(q: Query<Callback>) -> impl IntoResponse {
+    // If user denies you access, you'll see this
     if let Some(_) = &q.error {
         return (
             StatusCode::EXPECTATION_FAILED,
-            Json(json!("User declined auth")),
+            Json(json!("User delined during Smartcar Connect")),
         );
     };
 
     let code = &q.code.to_owned().unwrap();
-    let res = get_attributes_handler(code.as_str()).await;
+    let res = get_attributes(code.as_str()).await;
 
-    // If user denies you access, you'll see this
-    let (attributes, meta) = match res {
+    match res {
         Err(_) => {
             return (
                 StatusCode::EXPECTATION_FAILED,
-                Json(json!("User delined during Smartcar Connect")),
+                Json(json!("attributes request failed")),
             )
         }
-        Ok((a, m)) => (a, m),
-    };
+        Ok((attributes, meta)) => {
+            println!("Information about the request itself:\n\n{:#?}", meta);
+            println!("Vehicle's id, make, model, year:\n\n{:#?}", attributes);
 
-    println!("Information about the request itself:\n\n{:#?}", meta);
-    println!("Vehicle's id, make, model, year:\n\n{:#?}", attributes);
-
-    (
-        StatusCode::OK,
-        Json(json!(attributes)), // please help me make this better... lol
-    )
+            (
+                StatusCode::OK,
+                Json(json!(attributes)), // please help me make this better... lol
+            )
+        }
+    }
 }
 
-async fn get_attributes_handler(
+async fn get_attributes(
     auth_code: &str,
 ) -> Result<(VehicleAttributes, Meta), smartcar::error::Error> {
     let client = get_auth_client();
@@ -143,18 +161,4 @@ async fn get_attributes_handler(
 
     Ok((attributes, meta))
 }
-
-#[tokio::main]
-async fn main() {
-    let app = Router::new()
-        .route("/login", get(login))
-        .route("/callback", get(callback));
-
-    // run it with hyper on localhost:3000
-    axum::Server::bind(&"0.0.0.0:3000".parse().unwrap())
-        .serve(app.into_make_service())
-        .await
-        .unwrap();
-}
-
 ```

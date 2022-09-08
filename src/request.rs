@@ -1,7 +1,6 @@
-use std::collections::HashMap;
-
 use reqwest::{RequestBuilder, Response, StatusCode};
 use serde_json::Value;
+use std::collections::HashMap;
 
 use crate::{
     error::{Error, SmartcarError},

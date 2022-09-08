@@ -5,7 +5,6 @@ use crate::helpers::get_api_url;
 use crate::request::{get_bearer_token_header, HttpVerb, SmartcarRequestBuilder};
 use crate::response::batch::build_batch_request_body;
 use crate::response::{Action, ApplicationPermissions, Disconnect};
-
 use crate::response::{
     Batch, BatteryCapacity, BatteryLevel, ChargingStatus, EngineOilLife, FuelTank, Location, Meta,
     Odometer, TirePressure, VehicleAttributes, Vin,
@@ -17,7 +16,6 @@ pub enum UnitSystem {
     Metric,
 }
 
-/// A vehicle instance, for making requests to Smartcar API
 #[derive(Debug)]
 pub struct Vehicle {
     pub id: String,
@@ -26,6 +24,7 @@ pub struct Vehicle {
 }
 
 impl Vehicle {
+    /// Initializes a new Vehicle to use for making requests to the Smartcar API.
     pub fn new(vehicle_id: &str, access_token: &str) -> Vehicle {
         Vehicle {
             id: vehicle_id.to_owned(),

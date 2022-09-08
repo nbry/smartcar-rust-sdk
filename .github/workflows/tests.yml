@@ -21,4 +21,4 @@ jobs:
     - name: Build
       run: cargo build --verbose
     - name: Run tests
-      run: cargo test --verbose
+      run: ${{secrets.E2E_SMARTCAR_CLIENT_ID}} ${{secrets.E2E_SMARTCAR_CLIENT_SECRET}} ${{secrets.E2E_SMARTCAR_REDIRECT_URI}} cargo test --verbose

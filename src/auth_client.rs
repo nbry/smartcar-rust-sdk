@@ -1,5 +1,3 @@
-use serde_json::json;
-
 use crate::helpers::{format_flag_query, get_connect_url, get_oauth_url};
 use crate::request::{MultiQuery, SmartcarRequestBuilder};
 use crate::response::Access;

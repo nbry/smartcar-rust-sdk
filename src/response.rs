@@ -1,4 +1,7 @@
+use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
+
+use crate::error::SmartcarError;
 
 pub mod batch;
 pub mod meta;
@@ -118,5 +121,54 @@ pub struct Capability {
 pub struct Compatibility {
     pub compatible: bool,
     pub reason: Option<String>,
-    pubcapabilities: Vec<Capability>,
+    pub capabilities: Vec<Capability>,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct Meta {
+    #[serde(rename = "sc-data-age")]
+    pub data_age: Option<DateTime<Utc>>,
+
+    #[serde(rename = "sc-request-id")]
+    pub request_id: Option<String>,
+
+    #[serde(rename = "sc-unit-system")]
+    pub unit_system: Option<String>,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+#[serde(untagged)]
+pub enum SmartcarResponseBody {
+    ApplicationPermissions(ApplicationPermissions),
+    EngineOilLife(EngineOilLife),
+    BatteryCapacity(BatteryCapacity),
+    BatteryLevel(BatteryLevel),
+    ChargingStatus(ChargingStatus),
+    FuelTank(FuelTank),
+    Location(Location),
+    Odometer(Odometer),
+    TirePressure(TirePressure),
+    VehicleAttributes(VehicleAttributes),
+    Vin(Vin),
+    SmartcarError(SmartcarError),
+}
+
+/// Individual response in a batch response body
+///
+/// [More info on batch](https://smartcar.com/api#post-batch-request)
+#[derive(Debug, Deserialize, Serialize)]
+pub struct BatchResponse {
+    pub path: String,
+    pub body: SmartcarResponseBody,
+    pub code: i32,
+    pub headers: Option<Meta>,
+}
+
+/// Returned list of responses for multiple Smartcar Endpoints after
+/// sending a batch request
+///
+/// [More info on batch](https://smartcar.com/api#post-batch-request)
+#[derive(Debug, Deserialize, Serialize)]
+pub struct Batch {
+    pub responses: Vec<BatchResponse>,
 }

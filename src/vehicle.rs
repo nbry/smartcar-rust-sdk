@@ -3,13 +3,12 @@ use serde_json::json;
 use crate::error::Error;
 use crate::helpers::get_api_url;
 use crate::request::{get_bearer_token_header, HttpVerb, SmartcarRequestBuilder};
-use crate::response::batch::{build_batch_request_body, Batch};
-use crate::response::meta::Meta;
+use crate::response::batch::build_batch_request_body;
 use crate::response::{Action, ApplicationPermissions, Disconnect};
 
 use crate::response::{
-    BatteryCapacity, BatteryLevel, ChargingStatus, EngineOilLife, FuelTank, Location, Odometer,
-    TirePressure, VehicleAttributes, Vin,
+    Batch, BatteryCapacity, BatteryLevel, ChargingStatus, EngineOilLife, FuelTank, Location, Meta,
+    Odometer, TirePressure, VehicleAttributes, Vin,
 };
 
 #[derive(Debug)]

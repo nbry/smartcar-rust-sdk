@@ -26,7 +26,7 @@ async fn full_e2e_bev() -> Result<(), Box<dyn std::error::Error>> {
     let get_auth_url_options = AuthUrlOptionsBuilder::new().set_force_prompt(true);
 
     // GET ACCESS TOKEN
-    let url = ac.get_auth_url(&scope, get_auth_url_options);
+    let url = ac.get_auth_url(&scope, Some(&get_auth_url_options));
     let code = run_connect_flow(url.as_str(), "TESLA", "4444").await?;
     let (access, _) = ac.exchange_code(code.as_str()).await?;
     let access_token = access.access_token.as_str();
@@ -116,11 +116,15 @@ async fn full_e2e_ice() -> Result<(), Box<dyn std::error::Error>> {
     );
     let get_auth_url_options = AuthUrlOptionsBuilder::new().set_force_prompt(true);
 
-    // GET ACCESS TOKEN
-    let url = ac.get_auth_url(&scope, get_auth_url_options);
+    // GET TOKENS
+    let url = ac.get_auth_url(&scope, Some(&get_auth_url_options));
     let code = run_connect_flow(url.as_str(), "BUICK", "4444").await?;
     let (access, _) = ac.exchange_code(code.as_str()).await?;
-    let access_token = access.access_token.as_str();
+
+    // TRY A REFRESH TOKEN EXCHANGE
+    let refresh_token = access.refresh_token.as_str();
+    let (new_access, _) = ac.exchange_refresh_token(refresh_token).await?;
+    let access_token = new_access.access_token.as_str();
 
     // GET VEHICLES
     let (vehicles, _) = get_vehicles(&access, None, None).await?;

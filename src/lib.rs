@@ -1,3 +1,24 @@
+//! # `smartcar` - the Rust SDK for Smartcar API
+//!
+//! `smartcar` is a client library for sending requests to [Smartcar API](https://smartcar.com/docs).
+//! Smartcar API lets you read vehicle data and send commands to vehicles using HTTP requests.
+//!
+//! To make requests to a vehicle from a web or mobile application, the end user must connect their vehicle
+//! using [Smartcar Connect](https://smartcar.com/docs/api#smartcar-connect). This flow follows the OAuth
+//! spec and will return a `code` which can be used to obtain an access token from Smartcar.
+//!
+//! The Smartcar Rust SDK provides methods to:
+//!
+//! 1. Generate the link to redirect to Connect.
+//! 2. Make a request to Smartcar with the `code` obtained from Connect to obtain an
+//!    access and refresh token
+//! 3. Make requests to the Smartcar API to read vehicle data and send commands to
+//!    vehicles using the access token obtained in step 2.
+//!
+//! Before integrating with Smartcar's SDK, you'll need to register an application in the
+//! [Smartcar Developer portal](https://developer.smartcar.com). If you do not have access
+//! to the dashboard, please [request access](https://smartcar.com/subscribe).
+
 pub(crate) mod helpers;
 
 pub mod auth_client;
@@ -15,10 +36,7 @@ use std::{
 
 use helpers::{format_flag_query, get_api_url};
 use request::{get_bearer_token_header, HttpVerb, SmartcarRequestBuilder};
-use response::{
-    meta::{self, Meta},
-    Access, Compatibility, Vehicles,
-};
+use response::{meta, Access, Compatibility, Meta, Vehicles};
 
 /// Return a list of the user's vehicle ids
 ///
@@ -121,10 +139,6 @@ pub async fn get_compatibility(
 
     Ok((data, meta))
 }
-
-////////////////////////
-/// PERMISSION/SCOPE ///
-////////////////////////
 
 /// A permission that your application is requesting access to during SmartcarConnect
 ///

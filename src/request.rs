@@ -5,7 +5,7 @@ use serde_json::Value;
 
 use crate::{
     error::{Error, SmartcarError},
-    response::meta::{self, Meta},
+    response::{meta, Meta},
 };
 
 pub(crate) trait MultiQuery {

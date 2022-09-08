@@ -41,12 +41,12 @@ pub mod webhooks;
 ///
 /// [More info on User](https://smartcar.com/docs/api/#get-user)
 pub async fn get_user(access: &Access) -> Result<(User, Meta), error::Error> {
-    let url = format!("{api_url}/v2.0/user", api_url = get_api_url().as_str());
+    let url = format!("{api_url}/v2.0/user", api_url = get_api_url());
     let res = reqwest::Client::new()
-        .get(url)
+        .get(&url)
         .header(
             "Authorization",
-            get_bearer_token_header(access.access_token.as_str()),
+            get_bearer_token_header(&access.access_token),
         )
         .send()
         .await?;
@@ -65,10 +65,10 @@ pub async fn get_vehicles(
     limit: Option<i32>,
     offset: Option<i32>,
 ) -> Result<(Vehicles, Meta), error::Error> {
-    let url = format!("{api_url}/v2.0/vehicles", api_url = get_api_url().as_str());
-    let mut req = reqwest::Client::new().get(url).header(
+    let url = format!("{api_url}/v2.0/vehicles", api_url = get_api_url());
+    let mut req = reqwest::Client::new().get(&url).header(
         "Authorization",
-        get_bearer_token_header(access.access_token.as_str()),
+        get_bearer_token_header(&access.access_token),
     );
 
     if let Some(l) = limit {
@@ -116,12 +116,12 @@ pub async fn get_compatibility(
 
     let mut req = SmartcarRequestBuilder::new(url, HttpVerb::GET)
         .add_query("vin", vin)
-        .add_query("scope", scope.query_value.as_str())
+        .add_query("scope", &scope.query_value)
         .add_query("country", country);
 
     if let Some(opts) = options {
         if let Some(flags) = opts.flags {
-            req = req.add_query("flags", format_flag_query(&flags).as_str());
+            req = req.add_query("flags", &format_flag_query(&flags));
         };
         if let Some(id) = opts.client_id {
             client_id = Ok(id);
@@ -149,7 +149,7 @@ pub async fn get_compatibility(
     let (res, meta) = req
         .add_header(
             "Authorization",
-            request::get_basic_b64_auth_header(id.as_str(), secret.as_str()).as_str(),
+            &request::get_basic_b64_auth_header(&id, &secret),
         )
         .send()
         .await?;
@@ -254,5 +254,5 @@ fn test_getting_scope_url_params_string() {
         .add_permission(Permission::ReadVin);
 
     let expecting = "read_engine_oil read_fuel read_vin";
-    assert_eq!(permissions.query_value.as_str(), expecting);
+    assert_eq!(&permissions.query_value, expecting);
 }

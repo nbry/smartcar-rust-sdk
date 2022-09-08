@@ -227,15 +227,15 @@ impl AuthClient {
         let mut url = get_connect_url();
 
         url.push_str("/oauth/authorize?scope=");
-        url.push_str(scope.query_value.as_str());
+        url.push_str(&scope.query_value);
         url.push_str("&response_type=code&");
-        url.push_str(self.multi_query().as_str());
+        url.push_str(&self.multi_query());
 
         if let Some(opt) = options {
             let options_query = opt.multi_query();
             if options_query.len() > 0 {
                 url.push_str("&");
-                url.push_str(options_query.as_str());
+                url.push_str(&options_query);
             }
         }
 
@@ -253,13 +253,13 @@ impl AuthClient {
         let form = HashMap::from([
             ("grant_type", "authorization_code"),
             ("code", code),
-            ("redirect_uri", self.redirect_uri.as_str()),
+            ("redirect_uri", &self.redirect_uri),
         ]);
 
         let (res, meta) = SmartcarRequestBuilder::new(get_oauth_url(), request::HttpVerb::POST)
             .add_header(
                 "Authorization",
-                request::get_basic_b64_auth_header(&self.client_id, &self.client_secret).as_str(),
+                &request::get_basic_b64_auth_header(&self.client_id, &self.client_secret),
             )
             .add_header("content_type", "application/x-www-form-urlencoded")
             .add_form(form)
@@ -286,7 +286,7 @@ impl AuthClient {
         let (res, meta) = SmartcarRequestBuilder::new(get_oauth_url(), request::HttpVerb::POST)
             .add_header(
                 "Authorization",
-                request::get_basic_b64_auth_header(&self.client_id, &self.client_secret).as_str(),
+                &request::get_basic_b64_auth_header(&self.client_id, &self.client_secret),
             )
             .add_header("content_type", "application/x-www-form-urlencoded")
             .add_form(form)

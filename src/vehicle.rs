@@ -47,7 +47,7 @@ impl Vehicle {
 
         SmartcarRequestBuilder::new(url, verb).add_header(
             "Authorization",
-            get_bearer_token_header(self.access_token.as_str()).as_str(),
+            &get_bearer_token_header(&self.access_token),
         )
     }
 

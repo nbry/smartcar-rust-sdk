@@ -126,13 +126,13 @@ async fn get_attributes_handler(
 
     let (vehicle_ids, _) = smartcar::get_vehicles(&access, None, None).await?;
     println!(
-        "\n`Step 5: Use access token to get the user's vehicles (i.e. a list of vehicle ids):\n{:#?}",
+        "\nStep 5: Use access token to get the user's vehicles (i.e. a list of vehicle ids):\n{:#?}",
         vehicle_ids
     );
 
     let vehicle = Vehicle::new(&vehicle_ids.vehicles[0], &access.access_token);
     println!(
-        "\n`Step 6: Use any id from the Vehicles (plural) instance to make a single Vehicle struct:\n{:#?}",
+        "\nStep 6: Use any id from the Vehicles (plural) instance to make a single Vehicle struct:\n{:#?}",
         vehicle
     );
 

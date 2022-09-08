@@ -25,9 +25,9 @@ pub(crate) trait MultiQuery {
             }
 
             let (q, v) = query_vec[i].to_owned();
-            query_string.push_str(q.as_str());
+            query_string.push_str(&q);
             query_string.push_str("=");
-            query_string.push_str(v.as_str());
+            query_string.push_str(&v);
         }
 
         query_string
@@ -43,7 +43,7 @@ pub(crate) fn get_bearer_token_header(access_token: &str) -> String {
 pub(crate) fn get_basic_b64_auth_header(client_id: &str, client_secret: &str) -> String {
     let credentials = format!("{}:{}", client_id, client_secret);
     let encoded = base64::encode(credentials.as_bytes());
-    format!("Basic {}", encoded.as_str())
+    format!("Basic {}", &encoded)
 }
 
 pub(crate) enum HttpVerb {

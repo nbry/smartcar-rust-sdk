@@ -1,57 +1,3 @@
-# Smartcar Rust SDK
-
-[![Crate](https://img.shields.io/crates/v/smartcar.svg)](https://crates.io/crates/smartcar)
-[![Documentation](https://docs.rs/smartcar/badge.svg)](https://docs.rs/smartcar)
-
-Rust crate for Smartcar API
-
-## Overview
-
-[Smartcar API](https://smartcar.com/docs) lets you read vehicle data and send commands to vehicles (lock, unlock) using HTTP requests.
-
-To make requests to a vehicle from a web or mobile application, the end user must connect their vehicle using [Smartcar Connect](https://smartcar.com/docs/api#smartcar-connect). This flow follows the OAuth spec and will return a `code` which can be used to obtain an access token from Smartcar.
-
-The Smartcar Rust SDK provides methods to:
-
-1. Generate the link to redirect to Connect.
-2. Make a request to Smartcar with the `code` obtained from Connect to obtain an
-   access and refresh token
-3. Make requests to the Smartcar API to read vehicle data and send commands to
-   vehicles using the access token obtained in step 2.
-
-Before integrating with Smartcar's SDK, you'll need to register an application in the [Smartcar Developer portal](https://developer.smartcar.com). If you do not have access to the dashboard, please [request access](https://smartcar.com/subscribe).
-
-## Installation
-
-Add this to your `Cargo.toml`:
-
-```
-[dependencies]
-smartcar = "0.1.0"
-```
-
-## Flow
-
-- Create a new `AuthClient` object with your `client_id`, `client_secret`,
-  `redirectUri`.
-- Redirect the user to Smartcar Connect using `<AuthClient>.get_auth_url` with required `scope` or with one
-  of our frontend SDKs.
-- The user will login, and then accept or deny your `scope`'s permissions.
-- Handle the get request to your `redirect_uri`.
-  - If the user accepted your permissions:
-    - Use `<AuthClient>.exchange_code` with this code to obtain an access struct.
-		This struct contains an access token (lasting 2 hours) and a refresh token (lasting 60 days).
-	  - (Save this access struct)
-- Get the user's vehicles with `get_vehicles`.
-- Create a new `vehicle` struct using an `d` from the previous response,
-  and the `access_token`.
-- Make requests to the Smartcar API.
-- Use `<AuthClient>.exchange_refresh_token` on your saved `refresh_token` to retrieve a new token
-  when your `accessToken` expires.
-
-## Getting Started
-
-```
 use axum::extract::Query;
 use axum::http::StatusCode;
 use axum::response::{IntoResponse, Redirect};
@@ -156,5 +102,3 @@ async fn main() {
         .await
         .unwrap();
 }
-
-```

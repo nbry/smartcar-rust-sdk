@@ -1,6 +1,6 @@
 [package]
 name = "smartcar"
-version = "0.1.1-beta.1"
+version = "0.1.0"
 edition = "2021"
 license = "MIT"
 documentation= "https://github.com/nbry/smartcar-rust-sdk"
@@ -24,6 +24,8 @@ tokio = { version = "1", features = ["full"] }
 url = "2.2.2"
 
 [dev-dependencies]
+axum = "0.5.15"
+axum-macros = "0.2.3"
 fantoccini = "0.19.3"
 tokio = "1.19.2"
 serial_test = "0.9.0"

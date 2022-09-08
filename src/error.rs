@@ -27,12 +27,12 @@ pub enum Error {
 #[error("{error_type}::{description}")]
 pub struct SmartcarError {
     #[serde(rename = "type")]
-    error_type: String,
-    code: Option<String>,
-    description: String,
+    pub error_type: String,
+    pub code: Option<String>,
+    pub description: String,
     #[serde(rename = "docURL")]
-    doc_url: String,
-    status_code: i32,
-    resolution: HashMap<String, Option<String>>,
-    request_id: String,
+    pub doc_url: String,
+    pub status_code: i32,
+    pub resolution: HashMap<String, Option<String>>,
+    pub request_id: String,
 }

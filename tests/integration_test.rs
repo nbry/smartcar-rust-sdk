@@ -1,7 +1,7 @@
 use serial_test::serial;
 use smartcar::{
     auth_client::{AuthClient, AuthUrlOptionsBuilder},
-    get_vehicles,
+    get_user, get_vehicles,
     vehicle::Vehicle,
     CompatibilityOptions, ScopeBuilder,
 };
@@ -30,6 +30,9 @@ async fn full_e2e_bev() -> Result<(), Box<dyn std::error::Error>> {
     let code = run_connect_flow(url.as_str(), "TESLA", "4444").await?;
     let (access, _) = ac.exchange_code(code.as_str()).await?;
     let access_token = access.access_token.as_str();
+
+    let (user, _) = get_user(&access).await?;
+    println!("got user id: {:#?}", user);
 
     // GET VEHICLES
     let (vehicles, _) = get_vehicles(&access, None, None).await?;

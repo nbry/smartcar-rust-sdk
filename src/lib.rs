@@ -36,7 +36,27 @@ use std::{
 
 use helpers::{format_flag_query, get_api_url};
 use request::{get_bearer_token_header, HttpVerb, SmartcarRequestBuilder};
-use response::{meta, Access, Compatibility, Meta, Vehicles};
+use response::{meta, Access, Compatibility, Meta, User, Vehicles};
+
+/// Return the id of the vehicle owner who granted access to your application.
+///
+/// [More info on User](https://smartcar.com/docs/api/#get-user)
+pub async fn get_user(access: &Access) -> Result<(User, Meta), error::Error> {
+    let url = format!("{api_url}/v2.0/user", api_url = get_api_url().as_str());
+    let res = reqwest::Client::new()
+        .get(url)
+        .header(
+            "Authorization",
+            get_bearer_token_header(access.access_token.as_str()),
+        )
+        .send()
+        .await?;
+
+    let meta = meta::generate_meta_from_headers(res.headers());
+    let data = res.json::<User>().await?;
+
+    Ok((data, meta))
+}
 
 /// Return a list of the user's vehicle ids
 ///

@@ -98,6 +98,11 @@ pub struct Vin {
     pub vin: String,
 }
 
+#[derive(Deserialize, Debug)]
+pub struct User {
+    pub id: String,
+}
+
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Action {
     pub message: String,

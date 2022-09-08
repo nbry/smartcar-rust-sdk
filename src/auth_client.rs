@@ -1,7 +1,9 @@
+use serde_json::json;
+
 use crate::helpers::{format_flag_query, get_connect_url, get_oauth_url};
 use crate::request::{MultiQuery, SmartcarRequestBuilder};
-use crate::response::meta::Meta;
 use crate::response::Access;
+use crate::response::Meta;
 use crate::ScopeBuilder;
 use crate::{error, request};
 
@@ -165,18 +167,18 @@ fn get_auth_url_options_query_build() {
 /// Login/Signup for a Smartcar account here [here](https://smartcar.com/subscribe)
 pub struct AuthClient {
     /// The application’s unique identifier, obtained
-    client_id: String,
+    pub client_id: String,
 
     /// The application secret identfier. If forgotten, it must be regenerated in the dashboard.
-    client_secret: String,
+    pub client_secret: String,
 
     /// The URI a user will be redirected to after authorization.
     /// This value must match one of the redirect URIs set in the
     /// credentials tab of the dashboard.
-    redirect_uri: String,
+    pub redirect_uri: String,
 
     /// Launch the Smartcar auth flow in test mode
-    test_mode: bool,
+    pub test_mode: bool,
 }
 
 impl AuthClient {
@@ -218,7 +220,11 @@ impl AuthClient {
     /// grant your application permissions to interact with their vehicle.
     ///
     /// [Info about Smartcar Connect ](https://smartcar.com/docs/api/#smartcar-connect)
-    pub fn get_auth_url(&self, scope: &ScopeBuilder, options: AuthUrlOptionsBuilder) -> String {
+    pub fn get_auth_url(
+        &self,
+        scope: &ScopeBuilder,
+        options: Option<&AuthUrlOptionsBuilder>,
+    ) -> String {
         let mut url = get_connect_url();
 
         url.push_str("/oauth/authorize?scope=");
@@ -226,15 +232,17 @@ impl AuthClient {
         url.push_str("&response_type=code&");
         url.push_str(self.multi_query().as_str());
 
-        let options_query = options.multi_query();
-        if options_query.len() > 0 {
-            if !options_query.contains("approval_prompt") {
-                url.push_str("&approval_prompt=auto");
-            };
-
-            url.push_str("&");
-            url.push_str(options_query.as_str());
+        if let Some(opt) = options {
+            let options_query = opt.multi_query();
+            if options_query.len() > 0 {
+                url.push_str("&");
+                url.push_str(options_query.as_str());
+            }
         }
+
+        if !url.contains("approval_prompt") {
+            url.push_str("&approval_prompt=auto");
+        };
 
         url
     }
@@ -247,6 +255,33 @@ impl AuthClient {
             ("grant_type", "authorization_code"),
             ("code", code),
             ("redirect_uri", self.redirect_uri.as_str()),
+        ]);
+
+        let (res, meta) = SmartcarRequestBuilder::new(get_oauth_url(), request::HttpVerb::POST)
+            .add_header(
+                "Authorization",
+                request::get_basic_b64_auth_header(&self.client_id, &self.client_secret).as_str(),
+            )
+            .add_header("content_type", "application/x-www-form-urlencoded")
+            .add_form(form)
+            .send()
+            .await?;
+
+        let data = res.json::<Access>().await?;
+
+        Ok((data, meta))
+    }
+
+    /// Use your refresh token to get a new set of tokens
+    ///
+    /// [Info about refresh token exchange](https://smartcar.com/api#refresh-token-exchange)
+    pub async fn exchange_refresh_token(
+        &self,
+        refresh_token: &str,
+    ) -> Result<(Access, Meta), error::Error> {
+        let form = HashMap::from([
+            ("grant_type", "refresh_token"),
+            ("refresh_token", refresh_token),
         ]);
 
         let (res, meta) = SmartcarRequestBuilder::new(get_oauth_url(), request::HttpVerb::POST)
@@ -286,9 +321,9 @@ fn get_auth_url() {
     let ac = AuthClient::new("test-client-id", "test-client-secret", "test.com", true);
     let scope = ScopeBuilder::with_all_permissions();
     let options = AuthUrlOptionsBuilder::new();
-    let auth_url = ac.get_auth_url(&scope, options);
+    let auth_url = ac.get_auth_url(&scope, Some(&options));
 
-    let expecting =String::from("https://connect.smartcar.com/oauth/authorize?scope=read_engine_oil read_battery read_charge control_charge read_thermometer read_fuel read_location control_security read_odometer read_tires read_vehicle_info read_vin&response_type=code&client_id=test-client-id&client_secret=test-client-secret&redirect_uri=test.com&mode=test");
+    let expecting =String::from("https://connect.smartcar.com/oauth/authorize?scope=read_engine_oil read_battery read_charge control_charge read_thermometer read_fuel read_location control_security read_odometer read_tires read_vehicle_info read_vin&response_type=code&client_id=test-client-id&client_secret=test-client-secret&redirect_uri=test.com&mode=test&approval_prompt=auto");
     assert_eq!(auth_url, expecting);
 }
 

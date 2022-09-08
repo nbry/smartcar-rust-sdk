@@ -1,18 +1,7 @@
-use chrono::{DateTime, TimeZone, Utc};
+use chrono::{TimeZone, Utc};
 use reqwest::header::HeaderMap;
-use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Deserialize, Serialize)]
-pub struct Meta {
-    #[serde(rename = "sc-data-age")]
-    pub data_age: Option<DateTime<Utc>>,
-
-    #[serde(rename = "sc-request-id")]
-    pub request_id: Option<String>,
-
-    #[serde(rename = "sc-unit-system")]
-    pub unit_system: Option<String>,
-}
+use super::Meta;
 
 pub(crate) fn generate_meta_from_headers(headers: &HeaderMap) -> Meta {
     let mut meta = Meta {

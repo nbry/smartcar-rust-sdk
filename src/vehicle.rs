@@ -1,10 +1,14 @@
+//! The Vehicle struct is an instance with an access token and a single
+//! vehicle id. This struct contains methods to get data from and send comands
+//! to a vehicle using Smartcar API
+
 use serde_json::json;
 
 use crate::error::Error;
 use crate::helpers::get_api_url;
 use crate::request::{get_bearer_token_header, HttpVerb, SmartcarRequestBuilder};
 use crate::response::batch::build_batch_request_body;
-use crate::response::{Action, ApplicationPermissions, Disconnect};
+use crate::response::{Action, ApplicationPermissions, Status, Subscribe};
 use crate::response::{
     Batch, BatteryCapacity, BatteryLevel, ChargingStatus, EngineOilLife, FuelTank, Location, Meta,
     Odometer, TirePressure, VehicleAttributes, Vin,
@@ -43,7 +47,7 @@ impl Vehicle {
 
         SmartcarRequestBuilder::new(url, verb).add_header(
             "Authorization",
-            get_bearer_token_header(self.access_token.as_str()).as_str(),
+            &get_bearer_token_header(&self.access_token),
         )
     }
 
@@ -253,13 +257,53 @@ impl Vehicle {
     /// Revoke access for the current requesting application.
     ///
     /// [Disconnect](https://smartcar.com/api#delete-disconnect)
-    pub async fn disconnect(&self) -> Result<(Disconnect, Meta), Error> {
+    pub async fn disconnect(&self) -> Result<(Status, Meta), Error> {
         let path = "/application";
         let (res, meta) = self
             .request(path, HttpVerb::DELETE)
             .send()
             .await?;
-        let data = res.json::<Disconnect>().await?;
+        let data = res.json::<Status>().await?;
+
+        Ok((data, meta))
+    }
+
+    /// Subscribe a vehicle to a webhook
+    ///
+    /// [Subsribe to Webhook](https://smartcar.com/api#post-subscribe)
+    pub async fn subscribe(&self, webhook_id: &str) -> Result<(Subscribe, Meta), Error> {
+        let path = format!("/webhooks/{}", webhook_id);
+        let (res, meta) = self.request(&path, HttpVerb::POST).send().await?;
+        let data = res.json::<Subscribe>().await?;
+
+        Ok((data, meta))
+    }
+
+    /// Unsubscribe a vehicle to a webhook
+    ///
+    /// # Fields
+    /// - `amt` - The Application Management Token found on Smartcar Dashbaord
+    /// - `webhook_id` - The id of the webhook, found in your dashboard
+    ///
+    /// [Unsubscribe from Webhook](https://smartcar.com/api#delete-unsubscribe)
+    pub async fn unsubscribe(
+        &self,
+        amt: &str,
+        webhook_id: &str,
+    ) -> Result<(Subscribe, Meta), Error> {
+        let url = format!(
+            "{api_url}/v2.0/vehicles/{id}/webhooks/{webhook_id}",
+            api_url = get_api_url(),
+            id = self.id,
+            webhook_id = webhook_id
+        );
+
+        // Different bearer token requires a request built from scratch,
+        let (res, meta) = SmartcarRequestBuilder::new(url, HttpVerb::DELETE)
+            .add_header("Authorization", &get_bearer_token_header(amt))
+            .send()
+            .await?;
+        let data = res.json::<Subscribe>().await?;
 
         Ok((data, meta))
     }

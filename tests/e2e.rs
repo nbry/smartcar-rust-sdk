@@ -17,19 +17,14 @@ async fn full_e2e_bev() -> Result<(), Box<dyn std::error::Error>> {
     let scope = ScopeBuilder::with_all_permissions();
 
     // SET UP AUTH CLIENT
-    let ac = AuthClient::new(
-        client_id.as_str(),
-        client_secret.as_str(),
-        redirect_uri.as_str(),
-        true,
-    );
+    let ac = AuthClient::new(&client_id, &client_secret, &redirect_uri, true);
     let get_auth_url_options = AuthUrlOptionsBuilder::new().set_force_prompt(true);
 
     // GET ACCESS TOKEN
     let url = ac.get_auth_url(&scope, Some(&get_auth_url_options));
-    let code = run_connect_flow(url.as_str(), "TESLA", "4444").await?;
-    let (access, _) = ac.exchange_code(code.as_str()).await?;
-    let access_token = access.access_token.as_str();
+    let code = run_connect_flow(&url, "TESLA", "4444").await?;
+    let (access, _) = ac.exchange_code(&code).await?;
+    let access_token = &access.access_token;
 
     let (user, _) = get_user(&access).await?;
     println!("got user id: {:#?}", user);
@@ -92,8 +87,7 @@ async fn full_e2e_bev() -> Result<(), Box<dyn std::error::Error>> {
     };
 
     let compatiblity =
-        smartcar::get_compatibility(vin.0.vin.as_str(), &scope, "US", Some(compatibility_opts))
-            .await?;
+        smartcar::get_compatibility(&vin.0.vin, &scope, "US", Some(compatibility_opts)).await?;
     println!("compatiblity: {:#?}", compatiblity);
 
     Ok(())
@@ -107,21 +101,16 @@ async fn full_e2e_ice() -> Result<(), Box<dyn std::error::Error>> {
     let scope = ScopeBuilder::with_all_permissions();
 
     // SET UP AUTH CLIENT
-    let ac = AuthClient::new(
-        client_id.as_str(),
-        client_secret.as_str(),
-        redirect_uri.as_str(),
-        true,
-    );
+    let ac = AuthClient::new(&client_id, &client_secret, &redirect_uri, true);
     let get_auth_url_options = AuthUrlOptionsBuilder::new().set_force_prompt(true);
 
     // GET TOKENS
     let url = ac.get_auth_url(&scope, Some(&get_auth_url_options));
-    let code = run_connect_flow(url.as_str(), "BUICK", "4444").await?;
-    let (access, _) = ac.exchange_code(code.as_str()).await?;
+    let code = run_connect_flow(&url, "BUICK", "4444").await?;
+    let (access, _) = ac.exchange_code(&code).await?;
 
     // TRY A REFRESH TOKEN EXCHANGE
-    let refresh_token = access.refresh_token.as_str();
+    let refresh_token = &access.refresh_token;
     let (new_access, _) = ac.exchange_refresh_token(refresh_token).await?;
     let access_token = new_access.access_token;
 

@@ -35,7 +35,7 @@ pub(crate) fn format_flag_query(flags: &HashMap<String, String>) -> String {
 
         if let Some(v) = value {
             let flag_formatted = format!("{}:{} ", flag, v);
-            query.push_str(flag_formatted.as_str());
+            query.push_str(&flag_formatted);
         };
     });
 

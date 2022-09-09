@@ -11,12 +11,12 @@ use std::{collections::HashMap, env};
 ///
 /// [Info about Smartcar Connect ](https://smartcar.com/docs/api/#smartcar-connect)
 pub struct AuthUrlOptionsBuilder {
-    force_prompt: Option<bool>,
-    state: Option<String>,
-    make_bypass: Option<String>,
-    single_select: Option<bool>,
-    single_select_by_vin: Option<String>,
-    flags: Option<HashMap<String, String>>,
+    pub force_prompt: Option<bool>,
+    pub state: Option<String>,
+    pub make_bypass: Option<String>,
+    pub single_select: Option<bool>,
+    pub single_select_by_vin: Option<String>,
+    pub flags: Option<HashMap<String, String>>,
 }
 
 impl AuthUrlOptionsBuilder {
@@ -163,6 +163,7 @@ fn get_auth_url_options_query_build() {
 /// to get these fields.
 ///
 /// Login/Signup for a Smartcar account here [here](https://smartcar.com/subscribe)
+#[derive(Debug)]
 pub struct AuthClient {
     /// The application’s unique identifier, obtained
     pub client_id: String,
@@ -226,15 +227,15 @@ impl AuthClient {
         let mut url = get_connect_url();
 
         url.push_str("/oauth/authorize?scope=");
-        url.push_str(scope.query_value.as_str());
+        url.push_str(&scope.query_value);
         url.push_str("&response_type=code&");
-        url.push_str(self.multi_query().as_str());
+        url.push_str(&self.multi_query());
 
         if let Some(opt) = options {
             let options_query = opt.multi_query();
             if options_query.len() > 0 {
                 url.push_str("&");
-                url.push_str(options_query.as_str());
+                url.push_str(&options_query);
             }
         }
 
@@ -252,13 +253,13 @@ impl AuthClient {
         let form = HashMap::from([
             ("grant_type", "authorization_code"),
             ("code", code),
-            ("redirect_uri", self.redirect_uri.as_str()),
+            ("redirect_uri", &self.redirect_uri),
         ]);
 
         let (res, meta) = SmartcarRequestBuilder::new(get_oauth_url(), request::HttpVerb::POST)
             .add_header(
                 "Authorization",
-                request::get_basic_b64_auth_header(&self.client_id, &self.client_secret).as_str(),
+                &request::get_basic_b64_auth_header(&self.client_id, &self.client_secret),
             )
             .add_header("content_type", "application/x-www-form-urlencoded")
             .add_form(form)
@@ -285,7 +286,7 @@ impl AuthClient {
         let (res, meta) = SmartcarRequestBuilder::new(get_oauth_url(), request::HttpVerb::POST)
             .add_header(
                 "Authorization",
-                request::get_basic_b64_auth_header(&self.client_id, &self.client_secret).as_str(),
+                &request::get_basic_b64_auth_header(&self.client_id, &self.client_secret),
             )
             .add_header("content_type", "application/x-www-form-urlencoded")
             .add_form(form)

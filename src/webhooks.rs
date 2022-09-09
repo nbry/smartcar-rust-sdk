@@ -1,3 +1,5 @@
+//! Helpers for integrating webhooks with your application
+
 use hex;
 use hmac::{Hmac, Mac};
 use sha2::Sha256;
@@ -25,7 +27,7 @@ fn test_hash_challenge() {
     let amt = "abc123abc123";
     let body = "9c9c9c9c";
     let hex_encoding = hash_challenge(amt, body).unwrap();
-    let verified_payload = verify_payload(amt, hex_encoding.as_str(), body).unwrap();
+    let verified_payload = verify_payload(amt, &hex_encoding, body).unwrap();
 
     assert!(verified_payload == true);
 }

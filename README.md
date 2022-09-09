@@ -2,6 +2,7 @@
 
 [![Crate](https://img.shields.io/crates/v/smartcar.svg)](https://crates.io/crates/smartcar)
 [![Documentation](https://docs.rs/smartcar/badge.svg)](https://docs.rs/smartcar)
+[![Tests](https://github.com/nbry/smartcar-rust-sdk/actions/workflows/tests.yml/badge.svg)](https://github.com/nbry/smartcar-rust-sdk/actions/workflows/tests.yml)
 
 Rust library crate for sending requests to Smartcar API
 

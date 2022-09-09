@@ -28,7 +28,7 @@ Add this to your `Cargo.toml`:
 
 ```
 [dependencies]
-smartcar = "0.1.4"
+smartcar = "0.1.5"
 ```
 
 ## Flow
@@ -48,7 +48,7 @@ smartcar = "0.1.4"
 
 ---
 
-*\* In order to make subsequent requests, you will need to save this access struct somewhere.*
+*\* In order to make subsequent requests, you will need to save this Access struct somewhere.*
 
 *\*\* When your access token expires, use `<AuthClient>.exchange_refresh_token` to get new tokens*
 

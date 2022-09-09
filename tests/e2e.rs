@@ -26,14 +26,14 @@ async fn full_e2e_bev() -> Result<(), Box<dyn std::error::Error>> {
     let (access, _) = ac.exchange_code(&code).await?;
     let access_token = &access.access_token;
 
-    let (user, _) = get_user(&access).await?;
-    println!("got user id: {:#?}", user);
+    let (_, _) = get_user(&access).await?;
+    // println!("got user id: {:#?}", user);
 
     // GET VEHICLES & ISOLATE FIRST VEHICLE
     let (vehicles, _) = get_vehicles(&access, None, None).await?;
-    println!("got vehicle ids: {:#?}", vehicles);
+    // println!("got vehicle ids: {:#?}", vehicles);
     let v = Vehicle::new(&vehicles.vehicles[0], access_token);
-    println!("using first vehicle: {:#?}", v);
+    // println!("using first vehicle: {:#?}", v);
 
     let permissions = v.permissions().await?;
     println!("permissions: {:#?}", permissions);
@@ -117,7 +117,7 @@ async fn full_e2e_ice() -> Result<(), Box<dyn std::error::Error>> {
     // GET VEHICLES & ISOLATE FIRST VEHICLE
     let (vehicles, _) = get_vehicles(&access, None, None).await?;
     let v = Vehicle::new(&vehicles.vehicles[1], &access_token);
-    println!("using first vehicle: {:#?}", v);
+    // println!("using first vehicle: {:#?}", v);
 
     let engine_oil = v.engine_oil().await?;
     println!("engine_oil: {:#?}", engine_oil);

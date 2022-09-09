@@ -201,7 +201,7 @@ pub struct Status {
 /// Contains the information about a webhook upon subscribing a vehicle to one
 ///
 /// This is the struct representation for the response body of
-/// **POST** https://api.smartcar.com/v2.0/vehicles/{id}/webhooks/{webhookId}`
+/// **POST** `https://api.smartcar.com/v2.0/vehicles/{id}/webhooks/{webhookId}`
 #[derive(Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Subscribe {

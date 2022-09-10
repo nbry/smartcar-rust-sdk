@@ -1,3 +1,5 @@
+//! Everything needed for Smartcar Connect and getting tokens
+
 use crate::helpers::{format_flag_query, get_connect_url, get_oauth_url};
 use crate::request::{MultiQuery, SmartcarRequestBuilder};
 use crate::response::Access;
@@ -243,7 +245,7 @@ impl AuthClient {
             url.push_str("&approval_prompt=auto");
         };
 
-        url
+        url.replace(" ", "%20")
     }
 
     /// Exhange your oauth code for an access token
@@ -322,7 +324,7 @@ fn get_auth_url() {
     let options = AuthUrlOptionsBuilder::new();
     let auth_url = ac.get_auth_url(&scope, Some(&options));
 
-    let expecting =String::from("https://connect.smartcar.com/oauth/authorize?scope=read_engine_oil read_battery read_charge control_charge read_thermometer read_fuel read_location control_security read_odometer read_tires read_vehicle_info read_vin&response_type=code&client_id=test-client-id&client_secret=test-client-secret&redirect_uri=test.com&mode=test&approval_prompt=auto");
+    let expecting = String::from("https://connect.smartcar.com/oauth/authorize?scope=read_engine_oil%20read_battery%20read_charge%20control_charge%20read_thermometer%20read_fuel%20read_location%20control_security%20read_odometer%20read_tires%20read_vehicle_info%20read_vin&response_type=code&client_id=test-client-id&client_secret=test-client-secret&redirect_uri=test.com&mode=test&approval_prompt=auto");
     assert_eq!(auth_url, expecting);
 }
 

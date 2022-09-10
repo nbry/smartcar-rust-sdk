@@ -6,11 +6,11 @@ use axum::{routing::get, Router};
 use serde::Deserialize;
 use serde_json::json;
 
-use smartcar;
-use smartcar::auth_client::{AuthClient, AuthUrlOptionsBuilder};
-use smartcar::response::{Meta, VehicleAttributes};
-use smartcar::vehicle::Vehicle;
-use smartcar::{Permission, ScopeBuilder};
+use smartcar::*;
+
+use auth_client::{AuthClient, AuthUrlOptionsBuilder};
+use response::{Meta, VehicleAttributes};
+use vehicle::Vehicle;
 
 #[tokio::main]
 async fn main() {

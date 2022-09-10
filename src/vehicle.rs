@@ -1,6 +1,5 @@
-//! The Vehicle struct is an instance with an access token and a single
-//! vehicle id. This struct contains methods to get data from and send comands
-//! to a vehicle using Smartcar API
+//! This module includes the the vehicle struct. This struct contains methods
+//! for getting data from and send comands to a vehicle.
 
 use serde_json::json;
 

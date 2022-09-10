@@ -28,7 +28,7 @@ Add this to your `Cargo.toml`:
 
 ```
 [dependencies]
-smartcar = "0.1.5"
+smartcar = "0.1.6"
 ```
 
 ## Flow
@@ -38,31 +38,35 @@ smartcar = "0.1.5"
 3. The user will login and then accept or deny your `scope`'s permissions.
 4. If the user accepted your permissions:
 
-	a. Handle the get request to your `redirect_uri`.
+	a. Handle the get request to your `redirect_uri`. It will have a query `code`, which represents the user's consent.
 
 	b. Use `<AuthClient>.exchange_code` with this code to obtain an `Access` struct. This struct contains your tokens: `access_token` (lasting 3 hours) and `refresh_token` (lasting 60 days) *.
 
 5. Use `get_vehicles` to get a `Vehicles` struct that has all the the ids of the owner's vehicles.
-6. Create a new `Vehicle` struct using an `id` from the previous response and the `access_token` from Step 4.
-7. Start making requests to the Smartcar API
+6. Create a new `Vehicle` (singular) struct using an `id` from the previous response and the `access_token` from Step 4.
+7. Start making requests to the Smartcar API!
 
 ---
 
-*\* In order to make subsequent requests, you will need to save this Access struct somewhere.*
+*\* In order to make subsequent requests, you will need to save this the tokens in the Access struct somewhere.*
 
-*\*\* When your access token expires, use `<AuthClient>.exchange_refresh_token` to get new tokens*
+*\*\* When your access token expires, use `<AuthClient>.exchange_refresh_token` on your `refresh_token` to get a fresh set.*
 
 ## Getting Started
+
 
 Let's see a basic use case of `smartcar` using the [axum web framework](https://github.com/tokio-rs/axum). In this example, we will set up a simple server running on localhost 3000 to run through the flow described above, in order to get the make, model, and year of a vehicle.
 
 See the code in [./example/getting-started.rs](https://github.com/nbry/smartcar-rust-sdk/blob/main/examples/getting-started.rs).
 
+*For a much simpler example without a web framework integration, check out [./example/getting-started-cli.rs](https://github.com/nbry/smartcar-rust-sdk/blob/main/examples/getting-started-cli.rs).*
+
 ### Requirements
 
-- Rust/cargo toolchain - ([rust-lang.org - how to install](https://www.rust-lang.org/tools/install))
+- [Rust/cargo](https://www.rust-lang.org/tools/install)
+- A browser
 
-### How to Run the Example
+### How to run this example
 
 1. Clone this repo `cd` into the directory.
 2. Set up a new redirect URI in your Smartcar dashboard.
@@ -86,9 +90,9 @@ Follow along with the print statements in your terminal to see the steps!
 
 ---
 
-*\* example/getting-started.rs has print statements that correspond to the 7-step Flow above. The code below does not include the print statements, to minimize noise.
+*\* example/getting-started.rs has print statements that correspond to the 7-step Flow above. To minimize noise, the code below does not include the print statements.
 
-#### getting-started - *without the print statements*
+#### Getting started (with axum web framework)
 
 ```rust
 use axum::extract::Query;
@@ -99,11 +103,11 @@ use axum::{routing::get, Router};
 use serde::Deserialize;
 use serde_json::json;
 
-use smartcar;
-use smartcar::auth_client::{AuthClient, AuthUrlOptionsBuilder};
-use smartcar::response::{Meta, VehicleAttributes};
-use smartcar::vehicle::Vehicle;
-use smartcar::{Permission, ScopeBuilder};
+use smartcar::*;
+
+use auth_client::{AuthClient, AuthUrlOptionsBuilder};
+use response::{Meta, VehicleAttributes};
+use vehicle::Vehicle;
 
 #[tokio::main]
 async fn main() {
@@ -139,12 +143,11 @@ async fn login() -> Redirect {
 
     // Here we are adding the read_vehicle_info permission so we can get
     // the make, model, and year of the vehicle. In other words, we are asking
-	// the vehicle owner for permission to get these attributes.
+    // the vehicle owner for permission to get these attributes.
     let scope = ScopeBuilder::new().add_permission(Permission::ReadVehicleInfo);
 
     // Here we build the options for creating the auth url.
-    // This particular option forces the approval prompt page to show up.
-    // For educational purposes, let's force it to show up all the time.
+    // The following option forces the "approval" page to always show up.
     let auth_url_options = AuthUrlOptionsBuilder::new().set_force_prompt(true);
 
     // Flow - Step 2
@@ -165,7 +168,7 @@ struct Callback {
 // redirect URI in your Smartcar account dashboard to include http://localhost:3000/callback
 #[axum_macros::debug_handler]
 async fn callback(q: Query<Callback>) -> impl IntoResponse {
-    // Flow - after Step 3 completed, starting 4a
+    // Flow - Step 3 completed, starting 4a
 
     // If user denies you access, you'll see this
     if let Some(_) = &q.error {
@@ -175,8 +178,8 @@ async fn callback(q: Query<Callback>) -> impl IntoResponse {
         );
     };
 
-    // This is the authorization code that represents the user’s consent
-    // granting you (in this example) permission to read their vehicle's attributes
+    // This is the authorization code that represents the user’s consent,
+    // granting you permission to read their vehicle's attributes
     // This code must be exchanged for an access token to start making requests to the vehicle.
     let code = &q.code.to_owned().unwrap();
 
@@ -216,3 +219,4 @@ async fn get_attributes_handler(
     Ok((attributes, meta))
 }
 ```
+

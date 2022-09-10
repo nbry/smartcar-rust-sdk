@@ -7,10 +7,10 @@ use serde::{Deserialize, Serialize};
 
 use crate::error::SmartcarError;
 
-pub mod batch;
-pub mod meta;
+pub(crate) mod batch;
+pub(crate) mod meta;
 
-/// Contains tokens for authenticating API requests
+/// Tokens for authenticating API requests
 ///
 /// This is the struct representation for the response body of
 /// **POST** `https://auth.smartcar.com/oauth/token`
@@ -25,7 +25,7 @@ pub struct Access {
     pub token_type: String,
 }
 
-/// Contains a list of permissions that have been granted to your
+/// The list of permissions that have been granted to your
 /// application in relation to the vehicle
 ///
 /// This is the struct representation for the response body of
@@ -36,7 +36,7 @@ pub struct ApplicationPermissions {
     pub paging: Paging,
 }
 
-/// Contains the remaining life span of a vehicle’s engine oil
+/// The remaining life span of a vehicle’s engine oil
 ///
 /// This is the struct representation for the response body of
 /// **GET** `https://api.smartcar.com/v2.0/vehicles/{id}/engine/oil`
@@ -46,7 +46,7 @@ pub struct EngineOilLife {
     pub life_remaining: f32,
 }
 
-/// Contains the total capacity of an electric vehicle's battery
+/// The total capacity of an electric vehicle's battery
 ///
 /// This is the struct representation for the response body of
 /// **GET** `https://api.smartcar.com/v2.0/vehicles/{id}/battery/capacity`
@@ -55,7 +55,7 @@ pub struct BatteryCapacity {
     pub capacity: f32,
 }
 
-/// Contains the state of charge (SOC) and the remaining range of an electric vehicle's battery
+/// The state of charge and the remaining range of an electric vehicle's battery
 ///
 /// This is the struct representation for the response body of
 /// **GET** `https://api.smartcar.com/v2.0/vehicles/{id}/battery`
@@ -66,7 +66,7 @@ pub struct BatteryLevel {
     pub range: f32,
 }
 
-/// Contains the current charge status of an electric vehicle
+/// The current charging status of an electric vehicle
 ///
 /// This is the struct representation for the response body of
 /// **GET** `https://api.smartcar.com/v2.0/vehicles/{id}/charge`
@@ -77,7 +77,7 @@ pub struct ChargingStatus {
     pub state: String,
 }
 
-/// Contains the status of the fuel remaining in the vehicle’s gas tank
+/// Status of the fuel remaining in the vehicle’s gas tank
 ///
 /// This is the struct representation for the response body of
 /// **GET** `https://api.smartcar.com/v2.0/vehicles/{id}/fuel`
@@ -89,7 +89,7 @@ pub struct FuelTank {
     pub amount_remaining: f32,
 }
 
-/// Contains the last known location of the vehicle in geographic coordinates
+/// The last known location of the vehicle in geographic coordinates
 ///
 /// This is the struct representation for the response body of
 /// **GET** `https://api.smartcar.com/v2.0/vehicles/{id}/location`
@@ -99,7 +99,7 @@ pub struct Location {
     pub longitude: f32,
 }
 
-/// Contains the vehicle's last known odometer reading
+/// The vehicle's last known odometer reading
 ///
 /// This is the struct representation for the response body of
 /// **GET** `https://api.smartcar.com/v2.0/vehicles/{id}/odometer`
@@ -108,7 +108,7 @@ pub struct Odometer {
     pub distance: f32,
 }
 
-/// Contains a paged list of all vehicles connected to the application for the current authorized user
+/// A paged list of all vehicles connected to the application for the current authorized user
 ///
 /// This is the struct representation for the response body of
 /// **GET** `https://api.smartcar.com/v2.0/vehicles`
@@ -118,8 +118,9 @@ pub struct Vehicles {
     pub paging: Paging,
 }
 
-/// Contains metadata about the current a list of elements, including
-/// the total number of elements for the entire query and
+/// Metadata about the current a list of elements.
+///
+/// This includes the total number of elements for the entire query and
 /// the current start index of the returned list.
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Paging {
@@ -127,7 +128,7 @@ pub struct Paging {
     pub offset: i32,
 }
 
-/// Contains the the air pressure of each of the vehicle’s tires
+/// The the air pressure of each of the vehicle’s tires
 ///
 /// This is the struct representation for the response body of
 /// **GET** `https://api.smartcar.com/v2.0/vehicles/{id}/tires/pressure`
@@ -140,7 +141,7 @@ pub struct TirePressure {
     pub back_right: f32,
 }
 
-/// Contains the vehicle’s manufacturer identifier
+/// The vehicle’s manufacturer identifier
 ///
 /// This is the struct representation for the response body of
 /// **GET** `https://api.smartcar.com/v2.0/vehicles/{id}/vin`
@@ -149,7 +150,7 @@ pub struct Vin {
     pub vin: String,
 }
 
-/// Contains identifying information about a vehicle
+/// Identifying information about a vehicle
 ///
 /// This is the struct representation for the response body of
 /// **GET** `https://api.smartcar.com/v2.0/vehicles/{id}`
@@ -161,7 +162,7 @@ pub struct VehicleAttributes {
     pub year: i32,
 }
 
-/// Contains the id of the vehicle owner who granted access to your application
+/// The id of the vehicle owner who granted access to your application
 ///
 /// This is the struct representation for the response body of
 /// **GET** `https://api.smartcar.com/v2.0/user`
@@ -170,7 +171,7 @@ pub struct User {
     pub id: String,
 }
 
-/// Contains the status after sending a command to the vehicle
+/// The status after sending a command to the vehicle
 ///
 /// Commands include:
 /// - Lock/Unlock Doors
@@ -184,7 +185,7 @@ pub struct Action {
     pub status: String,
 }
 
-/// Contains the status after sending a DELETE request.
+/// Status after sending a DELETE request.
 ///
 /// This includes:
 /// - disconnecting a vehicle from an application
@@ -198,7 +199,7 @@ pub struct Status {
     pub status: String,
 }
 
-/// Contains the information about a webhook upon subscribing a vehicle to one
+/// The information about a webhook upon subscribing a vehicle to one
 ///
 /// This is the struct representation for the response body of
 /// **POST** `https://api.smartcar.com/v2.0/vehicles/{id}/webhooks/{webhookId}`
@@ -209,9 +210,10 @@ pub struct Subscribe {
     pub vehicle_id: String,
 }
 
-/// Contains information about whether the vehicle is capable of
-/// a smartcar endpoint. This struct as as part of the full Compatibility
-/// API response, and is thus nested in the Compatibility struct.
+/// Information about whether the vehicle is capable of a smartcar endpoint.
+///
+/// This struct is a part of the full Compatibility API response,
+/// and is thus nested in the capabilties field of the Compatibility struct.
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Capability {
     pub permission: String,
@@ -220,8 +222,8 @@ pub struct Capability {
     pub reason: Option<String>,
 }
 
-/// Contains information about whether a car is compatible with Smartcar API and
-/// if it is capable of the endpoints that your application needs.
+/// Information about whether a car is compatible with Smartcar API
+/// AND if it is capable of the endpoints that your application needs.
 ///
 /// This is the struct representation for the response body of
 /// **GET** `https://api.smartcar.com/v2.0/compatibility?vin={vin}&scope={scope}&country={country}`
@@ -232,7 +234,7 @@ pub struct Compatibility {
     pub capabilities: Vec<Capability>,
 }
 
-/// Contains the Smartcar headers from a response
+/// Smartcar headers from a response
 ///
 /// [More info on Smartcar Response Headers](https://smartcar.com/docs/api/#response-headers)
 #[derive(Debug, Deserialize, Serialize)]
@@ -282,8 +284,7 @@ pub struct BatchResponse {
     pub headers: Option<Meta>,
 }
 
-/// Contains the list of responses for multiple Smartcar Endpoints after
-/// sending a batch request
+/// The list of responses for multiple Smartcar Endpoints after sending a batch request
 ///
 /// This is the struct representation for the response body of
 /// **POST** `https://api.smartcar.com/v2.0/vehicles/{id}/batch`

@@ -1,6 +1,10 @@
+//! Classifies all potential errors of this SDK,
+//! including the Smartcar API V2 Error response.
+
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
+// All potential errors of the library
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
     #[error("sdk error::the http request failed")]
@@ -19,7 +23,7 @@ pub enum Error {
     SmartcarError(SmartcarError),
 }
 
-/// Error response from Smartcar api
+/// A detailed response from Smartcar API
 ///
 /// [More info about Smartcar Errors](https://smartcar.com/docs/api/#errors)
 #[derive(Debug, Deserialize, Serialize, thiserror::Error)]

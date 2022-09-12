@@ -3,4 +3,8 @@
 src/main.rs
 /examples/blah.rs
 
+# IDE
+.vscode
+.idea
+
 

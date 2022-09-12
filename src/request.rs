@@ -58,7 +58,7 @@ pub(crate) struct SmartcarRequestBuilder {
 }
 
 impl SmartcarRequestBuilder {
-    pub(crate) fn new(url: String, verb: HttpVerb) -> SmartcarRequestBuilder {
+    pub(crate) fn new(url: &str, verb: HttpVerb) -> SmartcarRequestBuilder {
         let client = reqwest::Client::new();
 
         SmartcarRequestBuilder {

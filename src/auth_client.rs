@@ -1,9 +1,8 @@
 //! Everything needed for Smartcar Connect and getting tokens
 
 use crate::helpers::{format_flag_query, get_connect_url, get_oauth_url};
-use crate::request::{MultiQuery, SmartcarRequestBuilder};
-use crate::response::Access;
-use crate::response::Meta;
+use crate::request::{get_basic_b64_auth_header, HttpVerb, MultiQuery, SmartcarRequestBuilder};
+use crate::response::{Access, Meta};
 use crate::ScopeBuilder;
 use crate::{error, request};
 
@@ -258,7 +257,7 @@ impl AuthClient {
             ("redirect_uri", &self.redirect_uri),
         ]);
 
-        let (res, meta) = SmartcarRequestBuilder::new(get_oauth_url(), request::HttpVerb::POST)
+        let (res, meta) = SmartcarRequestBuilder::new(&get_oauth_url(), HttpVerb::POST)
             .add_header(
                 "Authorization",
                 &request::get_basic_b64_auth_header(&self.client_id, &self.client_secret),
@@ -285,10 +284,10 @@ impl AuthClient {
             ("refresh_token", refresh_token),
         ]);
 
-        let (res, meta) = SmartcarRequestBuilder::new(get_oauth_url(), request::HttpVerb::POST)
+        let (res, meta) = SmartcarRequestBuilder::new(&get_oauth_url(), HttpVerb::POST)
             .add_header(
                 "Authorization",
-                &request::get_basic_b64_auth_header(&self.client_id, &self.client_secret),
+                &get_basic_b64_auth_header(&self.client_id, &self.client_secret),
             )
             .add_header("content_type", "application/x-www-form-urlencoded")
             .add_form(form)

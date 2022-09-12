@@ -44,7 +44,7 @@ impl Vehicle {
             path = path
         );
 
-        SmartcarRequestBuilder::new(url, verb).add_header(
+        SmartcarRequestBuilder::new(&url, verb).add_header(
             "Authorization",
             &get_bearer_token_header(&self.access_token),
         )
@@ -298,7 +298,7 @@ impl Vehicle {
         );
 
         // Different bearer token requires a request built from scratch,
-        let (res, meta) = SmartcarRequestBuilder::new(url, HttpVerb::DELETE)
+        let (res, meta) = SmartcarRequestBuilder::new(&url, HttpVerb::DELETE)
             .add_header("Authorization", &get_bearer_token_header(amt))
             .send()
             .await?;

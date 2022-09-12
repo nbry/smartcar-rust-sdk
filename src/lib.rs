@@ -29,7 +29,7 @@ use std::{
 
 use helpers::{format_flag_query, get_api_url};
 use request::{get_bearer_token_header, HttpVerb, SmartcarRequestBuilder};
-use response::{meta, Access, Compatibility, Meta, User, Vehicles};
+use response::{Access, Compatibility, Meta, User, Vehicles};
 
 pub mod auth_client;
 pub mod error;
@@ -40,18 +40,12 @@ pub mod webhooks;
 /// Return the id of the vehicle owner who granted access to your application.
 ///
 /// [More info on User](https://smartcar.com/docs/api/#get-user)
-pub async fn get_user(access: &Access) -> Result<(User, Meta), error::Error> {
+pub async fn get_user(acc: &Access) -> Result<(User, Meta), error::Error> {
     let url = format!("{api_url}/v2.0/user", api_url = get_api_url());
-    let res = reqwest::Client::new()
-        .get(&url)
-        .header(
-            "Authorization",
-            get_bearer_token_header(&access.access_token),
-        )
+    let (res, meta) = SmartcarRequestBuilder::new(&url, HttpVerb::GET)
+        .add_header("Authorization", &get_bearer_token_header(&acc.access_token))
         .send()
         .await?;
-
-    let meta = meta::generate_meta_from_headers(res.headers());
     let data = res.json::<User>().await?;
 
     Ok((data, meta))
@@ -61,25 +55,22 @@ pub async fn get_user(access: &Access) -> Result<(User, Meta), error::Error> {
 ///
 /// More info on [get all vehicles request](https://smartcar.com/api#get-all-vehicles)
 pub async fn get_vehicles(
-    access: &Access,
+    acc: &Access,
     limit: Option<i32>,
     offset: Option<i32>,
 ) -> Result<(Vehicles, Meta), error::Error> {
     let url = format!("{api_url}/v2.0/vehicles", api_url = get_api_url());
-    let mut req = reqwest::Client::new().get(&url).header(
-        "Authorization",
-        get_bearer_token_header(&access.access_token),
-    );
+    let mut req = SmartcarRequestBuilder::new(&url, HttpVerb::GET)
+        .add_header("Authorization", &get_bearer_token_header(&acc.access_token));
 
     if let Some(l) = limit {
-        req = req.query(&("limit", l));
+        req = req.add_query("limit", &l.to_string())
     }
     if let Some(o) = offset {
-        req = req.query(&("offset", o));
+        req = req.add_query("offset", &o.to_string());
     }
 
-    let res = req.send().await?;
-    let meta = meta::generate_meta_from_headers(res.headers());
+    let (res, meta) = req.send().await?;
     let data = res.json::<Vehicles>().await?;
 
     Ok((data, meta))
@@ -114,7 +105,7 @@ pub async fn get_compatibility(
     let mut client_secret = env::var("SMARTCAR_CLIENT_SECRET");
     let url = format!("{}/v2.0/compatibility", get_api_url());
 
-    let mut req = SmartcarRequestBuilder::new(url, HttpVerb::GET)
+    let mut req = SmartcarRequestBuilder::new(&url, HttpVerb::GET)
         .add_query("vin", vin)
         .add_query("scope", &scope.query_value)
         .add_query("country", country);

@@ -7,7 +7,7 @@ documentation= "https://docs.rs/smartcar/latest/smartcar/"
 homepage = "https://github.com/nbry/smartcar-rust-sdk"
 repository = "https://github.com/nbry/smartcar-rust-sdk"
 description = """
-Rust client SDK for the Smartcar API
+The Rust SDK for Smartcar API
 """
 
 [dependencies]

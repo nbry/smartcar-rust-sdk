@@ -23,7 +23,7 @@ pub enum Error {
     SmartcarError(SmartcarError),
 }
 
-/// A detailed response from Smartcar API
+/// A detailed error response from Smartcar API
 ///
 /// [More info about Smartcar Errors](https://smartcar.com/docs/api/#errors)
 #[derive(Debug, Deserialize, Serialize, thiserror::Error)]

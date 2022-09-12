@@ -1,6 +1,5 @@
 //! These structs are representations of the response body
-//! after sending a request
-//! to Smartcar API
+//! after sending a request to Smartcar API
 
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};

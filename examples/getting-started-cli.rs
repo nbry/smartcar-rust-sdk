@@ -160,7 +160,10 @@ async fn _retro_narrative(
     _m = "\nUsing the first vehicle".to_string();
     _print_and_delay(&_m.white()).await;
 
-    _m = format!("\nGot id, make, model, and year!:\n\n{:#?}", attributes);
+    _m = format!(
+        "\nGot vehicle's id, make, model, and year!\n\n{:#?}",
+        attributes
+    );
     _print_and_delay(&_m.purple()).await;
 
     _m = format!("\nGot the vehicle's odometer reading!\n\n{:#?}", odometer);

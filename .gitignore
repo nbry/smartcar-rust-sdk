@@ -1,10 +1,10 @@
-/.project
-/target
+.project
+examples/blah.rs
 src/main.rs
-/examples/blah.rs
+target
 
 # IDE
-.vscode
 .idea
+.vscode
 
 

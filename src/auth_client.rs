@@ -10,7 +10,7 @@ use std::{collections::HashMap, env};
 
 /// Pass in options to build a Smartcar Connect URL.
 ///
-/// [Info about Smartcar Connect ](https://smartcar.com/docs/api/#smartcar-connect)
+/// [Info about Smartcar Connect](https://smartcar.com/docs/api/#smartcar-connect)
 pub struct AuthUrlOptionsBuilder {
     pub force_prompt: Option<bool>,
     pub state: Option<String>,
@@ -37,7 +37,7 @@ impl AuthUrlOptionsBuilder {
     /// `true` -> only display approval dialog if user has not previously approved
     /// `false` -> ensure approval dialog is always shown
     ///
-    /// [Info about Smartcar Connect ](https://smartcar.com/docs/api/#smartcar-connect)
+    /// [Info about Smartcar Connect](https://smartcar.com/docs/api/#smartcar-connect)
     pub fn set_force_prompt(mut self, enabled: bool) -> Self {
         self.force_prompt = Some(enabled);
         self
@@ -219,7 +219,7 @@ impl AuthClient {
     /// Generate the Smartcar Connect URL, which will allow your userse to securely
     /// grant your application permissions to interact with their vehicle.
     ///
-    /// [Info about Smartcar Connect ](https://smartcar.com/docs/api/#smartcar-connect)
+    /// [Info about Smartcar Connect](https://smartcar.com/docs/api/#smartcar-connect)
     pub fn get_auth_url(
         &self,
         scope: &ScopeBuilder,

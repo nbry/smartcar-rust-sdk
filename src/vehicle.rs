@@ -1,5 +1,5 @@
 //! This module includes the the Vehicle struct, which is responsible
-//! for getting data from and send comands to a vehicle.
+//! for getting data from and sending comands to a vehicle.
 
 use serde_json::json;
 

@@ -28,7 +28,7 @@ Add this to your `Cargo.toml`:
 
 ```
 [dependencies]
-smartcar = "0.1.6"
+smartcar = "0.1.7"
 ```
 
 ## Flow

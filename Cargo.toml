@@ -1,6 +1,6 @@
 [package]
 name = "smartcar"
-version = "0.1.7"
+version = "0.1.8"
 edition = "2021"
 license = "MIT"
 documentation= "https://docs.rs/smartcar/latest/smartcar/"
@@ -24,7 +24,7 @@ tokio = { version = "1", features = ["full"] }
 url = "2.2.2"
 
 [dev-dependencies]
-axum = "0.5.15"
+axum = "0.5.16"
 axum-macros = "0.2.3"
 colored = "2.0.0"
 fantoccini = "0.19.3"

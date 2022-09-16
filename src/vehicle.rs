@@ -175,7 +175,7 @@ impl Vehicle {
 
     /// Lock the vehicle.
     ///
-    /// [POST - Lock/Unlock](https://smartcar.com/api#post-lockunlock)
+    /// [POST - Lock/Unlock Doors](https://smartcar.com/api#post-lockunlock)
     pub async fn lock(&self) -> Result<(Action, Meta), Error> {
         let path = "/security";
         let req_body = json!({ "action": "LOCK"});

@@ -78,7 +78,6 @@ struct Callback {
 
 // Handle Smartcar callback with auth code. To run this example, setup your
 // redirect URI in your Smartcar account dashboard to include http://localhost:3000/callback
-#[axum_macros::debug_handler]
 async fn callback(q: Query<Callback>) -> impl IntoResponse {
     println!("\nStep 3: Completed in browser, i.e. User finished connect flow");
     println!("\nStep 4a: Redirecting to /callback");

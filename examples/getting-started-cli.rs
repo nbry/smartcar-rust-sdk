@@ -91,7 +91,7 @@ async fn _print_instructions(auth_url: &str) {
     let mut message = "\nSMARTCAR RUST SDK - GETTING STARTED - CLI"
         .yellow()
         .bold();
-    println!("{}", message);
+    println!("{message}");
 
     println!(
         "\nIn this example, you you will be playing both the roles of the application developer"
@@ -107,35 +107,35 @@ async fn _print_instructions(auth_url: &str) {
     println!("odometer reading, vin, charge state, and battery level of a Tesla!");
 
     message = "\nP.S. Be a good sport and actually pick a Tesla :)".yellow();
-    println!("{}", message);
+    println!("{message}");
 
     println!("\nWe are going to be using test mode with mock cars. While in test mode,");
     println!("when prompted, you can choose any car and in enter fake credentials");
     message = "e.g. blah@blah.com, pass1234".white();
-    println!("{}", message);
+    println!("{message}");
 
     println!("\nAfter going through Smartcar Connect, you will be redirected to your");
     println!("REDIRECT URI with an auth code (i.e. with query of `code`).");
     println!("For example, if your redirect URI is:");
     message = "http://fake-redirect-uri.com/".cyan();
-    println!("{}", message);
+    println!("{message}");
 
     println!("\n...upon permission approval, it will be called like this:");
     message = "http://fake-redirect-uri.com/callback?code=12345-abcde".cyan();
-    println!("{}", message);
+    println!("{message}");
 
     println!("\nIn this example is, your auth `code` is:");
     message = "12345-abcde".purple();
-    println!("{}", message);
+    println!("{message}");
 
     println!("\nPaste the following URL in a browser to proceed with the Smartcar Connect flow:");
     let a = auth_url.clone().green();
-    println!("\n{}", a);
+    println!("\n{a}");
 
     message = "After you finish, paste your code below:"
         .red()
         .bold();
-    println!("\n{}", message);
+    println!("\n{message}");
 }
 
 async fn _retro_narrative(

@@ -1,9 +1,12 @@
 use serial_test::serial;
 use smartcar::{
     auth_client::{AuthClient, AuthUrlOptionsBuilder},
-    get_user, get_vehicles,
+    get_user,
+    get_vehicles,
+    request::HttpVerb,
     vehicle::Vehicle,
-    CompatibilityOptions, ScopeBuilder,
+    // CompatibilityOptions,
+    ScopeBuilder,
 };
 
 use crate::helpers::{get_creds_from_env, run_connect_flow};
@@ -71,6 +74,11 @@ async fn full_e2e_bev() -> Result<(), Box<dyn std::error::Error>> {
     let fuel_tank = v.fuel_tank().await;
     assert!(fuel_tank.is_err());
 
+    let compass = v
+        .request("/tesla/compass", HttpVerb::GET, None, None)
+        .await;
+    println!("compass: {:#?}", compass);
+
     let batch = v
         .batch(vec![
             "/odometer".to_string(),
@@ -80,15 +88,15 @@ async fn full_e2e_bev() -> Result<(), Box<dyn std::error::Error>> {
         .await?;
     println!("batch: {:#?}", batch);
 
-    let compatibility_opts = CompatibilityOptions {
-        client_id: Some(client_id),
-        client_secret: Some(client_secret),
-        flags: None,
-    };
+    // let compatibility_opts = CompatibilityOptions {
+    //     client_id: Some(client_id),
+    //     client_secret: Some(client_secret),
+    //     flags: None,
+    // };
 
-    let compatiblity =
-        smartcar::get_compatibility(&vin.0.vin, &scope, "US", Some(compatibility_opts)).await?;
-    println!("compatiblity: {:#?}", compatiblity);
+    // let compatiblity =
+    //     smartcar::get_compatibility(&vin.0.vin, &scope, "US", Some(compatibility_opts)).await?;
+    // println!("compatiblity: {:#?}", compatiblity);
 
     Ok(())
 }

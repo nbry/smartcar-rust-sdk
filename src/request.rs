@@ -7,6 +7,12 @@ use crate::{
     response::{meta, Meta},
 };
 
+pub enum HttpVerb {
+    GET,
+    POST,
+    DELETE,
+}
+
 pub(crate) trait MultiQuery {
     /// Build a vector of multiple query/value tuples
     fn vectorize(&self) -> Vec<(String, String)>;
@@ -44,12 +50,6 @@ pub(crate) fn get_basic_b64_auth_header(client_id: &str, client_secret: &str) ->
     let credentials = format!("{}:{}", client_id, client_secret);
     let encoded = base64::encode(credentials.as_bytes());
     format!("Basic {}", &encoded)
-}
-
-pub(crate) enum HttpVerb {
-    GET,
-    POST,
-    DELETE,
 }
 
 #[derive(Debug)]

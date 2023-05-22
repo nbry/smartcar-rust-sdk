@@ -19,7 +19,6 @@
 //! [Smartcar Developer portal](https://developer.smartcar.com). If you do not have access
 //! to the dashboard, please [request access](https://smartcar.com/subscribe).
 pub(crate) mod helpers;
-pub(crate) mod request;
 
 use serde::Deserialize;
 use std::{
@@ -33,13 +32,14 @@ use response::{Access, Compatibility, Meta, User, Vehicles};
 
 pub mod auth_client;
 pub mod error;
+pub mod request;
 pub mod response;
 pub mod vehicle;
 pub mod webhooks;
 
 /// Return the id of the vehicle owner who granted access to your application.
 ///
-/// [More info on User](https://smartcar.com/docs/api/#get-user)
+/// (https://smartcar.com/docs/api/#get-user)
 pub async fn get_user(acc: &Access) -> Result<(User, Meta), error::Error> {
     let url = format!("{api_url}/v2.0/user", api_url = get_api_url());
     let (res, meta) = SmartcarRequestBuilder::new(&url, HttpVerb::GET)

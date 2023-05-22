@@ -1,16 +1,19 @@
 //! This module includes the the Vehicle struct, which is responsible
 //! for getting data from and sending comands to a vehicle.
 
-use serde_json::json;
+use std::collections::HashMap;
+
+use reqwest::Response;
+use serde_json::{json, Value};
 
 use crate::error::Error;
 use crate::helpers::get_api_url;
 use crate::request::{get_bearer_token_header, HttpVerb, SmartcarRequestBuilder};
 use crate::response::batch::build_batch_request_body;
-use crate::response::{Action, ApplicationPermissions, Status, Subscribe};
 use crate::response::{
-    Batch, BatteryCapacity, BatteryLevel, ChargingStatus, EngineOilLife, FuelTank, Location, Meta,
-    Odometer, TirePressure, VehicleAttributes, Vin,
+    Action, ApplicationPermissions, Batch, BatteryCapacity, BatteryLevel, ChargeLimit,
+    ChargingStatus, EngineOilLife, FuelTank, Location, Meta, Odometer, Status, Subscribe,
+    TirePressure, VehicleAttributes, Vin,
 };
 
 #[derive(Debug)]
@@ -36,7 +39,7 @@ impl Vehicle {
         }
     }
 
-    fn request(&self, path: &str, verb: HttpVerb) -> SmartcarRequestBuilder {
+    fn get_request_builder(&self, path: &str, verb: HttpVerb) -> SmartcarRequestBuilder {
         let url = format!(
             "{api_url}/v2.0/vehicles/{id}{path}",
             api_url = get_api_url(),
@@ -50,13 +53,40 @@ impl Vehicle {
         )
     }
 
+    /// General purpose request method
+    pub async fn request(
+        &self,
+        path: &str,
+        verb: HttpVerb,
+        body: Option<Value>,
+        headers: Option<HashMap<String, String>>,
+    ) -> Result<(Response, Meta), Error> {
+        let mut request_builder = self.get_request_builder(path, verb);
+
+        if let Some(request_body) = body {
+            request_builder = request_builder.add_body(request_body);
+        }
+        if let Some(custom_headers) = headers {
+            for (key, val) in custom_headers.into_iter() {
+                request_builder = request_builder.add_header(key.as_str(), val.as_str())
+            }
+        }
+
+        let (res, meta) = request_builder.send().await?;
+
+        Ok((res, meta))
+    }
+
     /// Returns a list of the permissions that have been granted to your application
     /// in relation to this vehicle
     ///
     /// [GET - Application Permissions](https://smartcar.com/api#get-application-permissions)
     pub async fn permissions(&self) -> Result<(ApplicationPermissions, Meta), Error> {
         let path = "/permissions";
-        let (res, meta) = self.request(path, HttpVerb::GET).send().await?;
+        let (res, meta) = self
+            .get_request_builder(path, HttpVerb::GET)
+            .send()
+            .await?;
         let data = res.json::<ApplicationPermissions>().await?;
 
         Ok((data, meta))
@@ -67,7 +97,10 @@ impl Vehicle {
     /// [GET - Engine Oil](https://smartcar.com/api#get-engine-oil-life)
     pub async fn engine_oil(&self) -> Result<(EngineOilLife, Meta), Error> {
         let path = "/engine/oil";
-        let (res, meta) = self.request(path, HttpVerb::GET).send().await?;
+        let (res, meta) = self
+            .get_request_builder(path, HttpVerb::GET)
+            .send()
+            .await?;
         let data = res.json::<EngineOilLife>().await?;
 
         Ok((data, meta))
@@ -78,7 +111,10 @@ impl Vehicle {
     /// [GET - EV Battery Capacity](https://smartcar.com/api#get-ev-battery-capacity)
     pub async fn battery_capacity(&self) -> Result<(BatteryCapacity, Meta), Error> {
         let path = "/battery/capacity";
-        let (res, meta) = self.request(path, HttpVerb::GET).send().await?;
+        let (res, meta) = self
+            .get_request_builder(path, HttpVerb::GET)
+            .send()
+            .await?;
         let data = res.json::<BatteryCapacity>().await?;
 
         Ok((data, meta))
@@ -89,7 +125,10 @@ impl Vehicle {
     /// [GET - EV Battery Level](https://smartcar.com/api#get-ev-battery-level)
     pub async fn battery_level(&self) -> Result<(BatteryLevel, Meta), Error> {
         let path = "/battery";
-        let (res, meta) = self.request(path, HttpVerb::GET).send().await?;
+        let (res, meta) = self
+            .get_request_builder(path, HttpVerb::GET)
+            .send()
+            .await?;
         let data = res.json::<BatteryLevel>().await?;
 
         Ok((data, meta))
@@ -100,8 +139,25 @@ impl Vehicle {
     /// [GET - EV Charging Status](https://smartcar.com/api#get-ev-charging-status)
     pub async fn charging_status(&self) -> Result<(ChargingStatus, Meta), Error> {
         let path = "/charge";
-        let (res, meta) = self.request(path, HttpVerb::GET).send().await?;
+        let (res, meta) = self
+            .get_request_builder(path, HttpVerb::GET)
+            .send()
+            .await?;
         let data = res.json::<ChargingStatus>().await?;
+
+        Ok((data, meta))
+    }
+
+    /// Returns the current charge status of an electric vehicle.
+    ///
+    /// [GET - EV Charging Status](https://smartcar.com/api#get-ev-charging-status)
+    pub async fn charge_limit(&self) -> Result<(ChargeLimit, Meta), Error> {
+        let path = "/charge/limit";
+        let (res, meta) = self
+            .get_request_builder(path, HttpVerb::GET)
+            .send()
+            .await?;
+        let data = res.json::<ChargeLimit>().await?;
 
         Ok((data, meta))
     }
@@ -112,7 +168,10 @@ impl Vehicle {
     /// [GET - Fuel Tank](https://smartcar.com/api#get-fuel-tank)
     pub async fn fuel_tank(&self) -> Result<(FuelTank, Meta), Error> {
         let path = "/fuel";
-        let (res, meta) = self.request(path, HttpVerb::GET).send().await?;
+        let (res, meta) = self
+            .get_request_builder(path, HttpVerb::GET)
+            .send()
+            .await?;
         let data = res.json::<FuelTank>().await?;
 
         Ok((data, meta))
@@ -123,7 +182,10 @@ impl Vehicle {
     /// [GET - Location](https://smartcar.com/api#get-location)
     pub async fn location(&self) -> Result<(Location, Meta), Error> {
         let path = "/location";
-        let (res, meta) = self.request(path, HttpVerb::GET).send().await?;
+        let (res, meta) = self
+            .get_request_builder(path, HttpVerb::GET)
+            .send()
+            .await?;
         let data = res.json::<Location>().await?;
 
         Ok((data, meta))
@@ -134,7 +196,10 @@ impl Vehicle {
     /// [GET - Odometer](https://smartcar.com/api#get-odometer)
     pub async fn odometer(&self) -> Result<(Odometer, Meta), Error> {
         let path = "/odometer";
-        let (res, meta) = self.request(path, HttpVerb::GET).send().await?;
+        let (res, meta) = self
+            .get_request_builder(path, HttpVerb::GET)
+            .send()
+            .await?;
         let data = res.json::<Odometer>().await?;
 
         Ok((data, meta))
@@ -145,7 +210,10 @@ impl Vehicle {
     /// [GET - Tire Pressure](https://smartcar.com/api#get-tire-pressure)
     pub async fn tire_pressure(&self) -> Result<(TirePressure, Meta), Error> {
         let path = "/tires/pressure";
-        let (res, meta) = self.request(path, HttpVerb::GET).send().await?;
+        let (res, meta) = self
+            .get_request_builder(path, HttpVerb::GET)
+            .send()
+            .await?;
         let data = res.json::<TirePressure>().await?;
 
         Ok((data, meta))
@@ -156,7 +224,10 @@ impl Vehicle {
     /// [GET - Vehicle Attributes](https://smartcar.com/api#get-vehicle-attributes)
     pub async fn attributes(&self) -> Result<(VehicleAttributes, Meta), Error> {
         let path = "/";
-        let (res, meta) = self.request(path, HttpVerb::GET).send().await?;
+        let (res, meta) = self
+            .get_request_builder(path, HttpVerb::GET)
+            .send()
+            .await?;
         let data = res.json::<VehicleAttributes>().await?;
 
         Ok((data, meta))
@@ -167,7 +238,10 @@ impl Vehicle {
     /// [GET - VIN](https://smartcar.com/api#get-vin)
     pub async fn vin(&self) -> Result<(Vin, Meta), Error> {
         let path = "/vin";
-        let (res, meta) = self.request(path, HttpVerb::GET).send().await?;
+        let (res, meta) = self
+            .get_request_builder(path, HttpVerb::GET)
+            .send()
+            .await?;
         let data = res.json::<Vin>().await?;
 
         Ok((data, meta))
@@ -180,7 +254,7 @@ impl Vehicle {
         let path = "/security";
         let req_body = json!({ "action": "LOCK"});
         let (res, meta) = self
-            .request(path, HttpVerb::POST)
+            .get_request_builder(path, HttpVerb::POST)
             .add_body(req_body)
             .send()
             .await?;
@@ -196,7 +270,7 @@ impl Vehicle {
         let path = "/securiy";
         let req_body = json!({ "action": "UNLOCK"});
         let (res, meta) = self
-            .request(path, HttpVerb::POST)
+            .get_request_builder(path, HttpVerb::POST)
             .add_body(req_body)
             .send()
             .await?;
@@ -212,7 +286,7 @@ impl Vehicle {
         let path = "/charge";
         let req_body = json!({ "action": "START"});
         let (res, meta) = self
-            .request(path, HttpVerb::POST)
+            .get_request_builder(path, HttpVerb::POST)
             .add_body(req_body)
             .send()
             .await?;
@@ -228,7 +302,7 @@ impl Vehicle {
         let path = "/charge";
         let req_body = json!({ "action": "STOP"});
         let (res, meta) = self
-            .request(path, HttpVerb::POST)
+            .get_request_builder(path, HttpVerb::POST)
             .add_body(req_body)
             .send()
             .await?;
@@ -244,7 +318,7 @@ impl Vehicle {
         let path = "/batch";
         let req_body = build_batch_request_body(paths)?;
         let (res, meta) = self
-            .request(path, HttpVerb::POST)
+            .get_request_builder(path, HttpVerb::POST)
             .add_body(req_body)
             .send()
             .await?;
@@ -259,7 +333,7 @@ impl Vehicle {
     pub async fn disconnect(&self) -> Result<(Status, Meta), Error> {
         let path = "/application";
         let (res, meta) = self
-            .request(path, HttpVerb::DELETE)
+            .get_request_builder(path, HttpVerb::DELETE)
             .send()
             .await?;
         let data = res.json::<Status>().await?;
@@ -272,7 +346,10 @@ impl Vehicle {
     /// [POST - Subscribe to Webhook](https://smartcar.com/api#post-subscribe)
     pub async fn subscribe(&self, webhook_id: &str) -> Result<(Subscribe, Meta), Error> {
         let path = format!("/webhooks/{}", webhook_id);
-        let (res, meta) = self.request(&path, HttpVerb::POST).send().await?;
+        let (res, meta) = self
+            .get_request_builder(&path, HttpVerb::POST)
+            .send()
+            .await?;
         let data = res.json::<Subscribe>().await?;
 
         Ok((data, meta))

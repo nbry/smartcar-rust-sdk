@@ -30,7 +30,7 @@ pub(crate) fn format_flag_query(flags: &HashMap<String, String>) -> String {
         return query;
     };
 
-    flags.keys().into_iter().for_each(|flag| {
+    flags.keys().for_each(|flag| {
         let value = flags.get(flag);
 
         if let Some(v) = value {
@@ -52,6 +52,6 @@ fn formatting_flag_query() {
 
     // Order not preserved
     assert!(flag_query.contains("black:flag"));
-    assert!(flag_query.contains(" "));
+    assert!(flag_query.contains(' '));
     assert!(flag_query.contains("good:band"));
 }

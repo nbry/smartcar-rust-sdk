@@ -37,12 +37,7 @@ async fn main() -> Result<(), error::Error> {
     let auth_client = AuthClient::from_env(true);
     let auth_url_options = AuthUrlOptionsBuilder::new().set_force_prompt(true);
     let scope = ScopeBuilder::new()
-        .add_permission(Permission::ReadVehicleInfo)
-        .add_permission(Permission::ReadOdometer)
-        .add_permission(Permission::ReadVin)
-        .add_permission(Permission::ReadCharge)
-        .add_permission(Permission::ReadBattery)
-        .add_permission(Permission::ReadTires);
+        .add_permissions([Permission::ReadVehicleInfo, Permission::ReadOdometer, Permission::ReadVin, Permission::ReadCharge,Permission::ReadBattery, Permission::ReadTires]);
 
     // Generate URL for your user to go through Smartcar Connect
     // For this example, the user is you!
@@ -53,7 +48,6 @@ async fn main() -> Result<(), error::Error> {
 
     io::stdin()
         .read_line(&mut auth_code)
-        .ok()
         .expect("Expected the query `code`");
 
     println!("\nYou entered: {}", auth_code.blue());

@@ -46,7 +46,7 @@ pub(crate) fn get_basic_b64_auth_header(client_id: &str, client_secret: &str) ->
     format!("Basic {}", &encoded)
 }
 
-pub(crate) enum HttpVerb {
+pub enum HttpVerb {
     Get,
     Post,
     Delete,

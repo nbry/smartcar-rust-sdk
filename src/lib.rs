@@ -19,7 +19,6 @@
 //! [Smartcar Developer portal](https://developer.smartcar.com). If you do not have access
 //! to the dashboard, please [request access](https://smartcar.com/subscribe).
 pub(crate) mod helpers;
-pub(crate) mod request;
 
 use serde::Deserialize;
 use std::{
@@ -33,6 +32,7 @@ use response::{Access, Compatibility, Meta, User, Vehicles};
 
 pub mod auth_client;
 pub mod error;
+pub mod request;
 pub mod response;
 pub mod vehicle;
 pub mod webhooks;
@@ -155,6 +155,7 @@ pub async fn get_compatibility(
 /// [More info about Permissions](https://smartcar.com/docs/api/#permissions)
 #[derive(Deserialize, Debug, Eq, PartialEq, Hash, Clone, Copy)]
 pub enum Permission {
+    ReadCompass,     // Know the compass direction your vehicle is facing
     ReadEngineOil,   // Read vehicle engine oil health
     ReadBattery,     // Read EV battery's capacity and state of charge
     ReadCharge,      // Know whether vehicle is charging
@@ -164,6 +165,7 @@ pub enum Permission {
     ReadLocation,    // Access location
     ControlSecurity, // Lock or unlock your vehicle
     ReadOdometer,    // Retrieve total distance traveled
+    ReadSpeedeomter, // Know your vehicle's speed
     ReadTires,       // Read vehicle tire pressure
     ReadVehicleInfo, // Know make, model, and year
     ReadVin,         // Read VIN
@@ -172,6 +174,7 @@ pub enum Permission {
 impl Permission {
     fn as_str(&self) -> &str {
         match self {
+            Permission::ReadCompass => "read_compass",
             Permission::ReadEngineOil => "read_engine_oil",
             Permission::ReadBattery => "read_battery",
             Permission::ReadCharge => "read_charge",
@@ -181,6 +184,7 @@ impl Permission {
             Permission::ReadLocation => "read_location",
             Permission::ControlSecurity => "control_security",
             Permission::ReadOdometer => "read_odometer",
+            Permission::ReadSpeedeomter => "read_speedometer",
             Permission::ReadTires => "read_tires",
             Permission::ReadVehicleInfo => "read_vehicle_info",
             Permission::ReadVin => "read_vin",
@@ -209,7 +213,6 @@ impl ScopeBuilder {
         }
     }
 
-
     /// Adds a single permission to the scope builder
     pub fn add_permission(mut self, p: Permission) -> Self {
         if !self.permissions.contains(&p) {
@@ -223,9 +226,12 @@ impl ScopeBuilder {
 
         self
     }
-    
+
     /// Adds a `Vec` or slice of `Permissions` to this scope builder
-    pub fn add_permissions<T>(mut self, permissions: T) -> Self where T: AsRef<[Permission]> {
+    pub fn add_permissions<T>(mut self, permissions: T) -> Self
+    where
+        T: AsRef<[Permission]>,
+    {
         let permissions_slice = permissions.as_ref();
 
         for p in permissions_slice {
@@ -248,30 +254,32 @@ impl ScopeBuilder {
             permissions: HashSet::new(),
             query_value: String::from(""),
         }
-        .add_permissions(
-            vec![
-                Permission::ReadEngineOil,
-                Permission::ReadBattery,
-                Permission::ReadCharge,
-                Permission::ControlCharge,
-                Permission::ReadThermometer,
-                Permission::ReadFuel,
-                Permission::ReadLocation,
-                Permission::ControlSecurity,
-                Permission::ReadOdometer,
-                Permission::ReadTires,
-                Permission::ReadVehicleInfo,
-                Permission::ReadVin,
-            ]
-        )
+        .add_permissions(vec![
+            Permission::ReadCompass,
+            Permission::ReadEngineOil,
+            Permission::ReadBattery,
+            Permission::ReadCharge,
+            Permission::ControlCharge,
+            Permission::ReadThermometer,
+            Permission::ReadFuel,
+            Permission::ReadLocation,
+            Permission::ControlSecurity,
+            Permission::ReadOdometer,
+            Permission::ReadSpeedeomter,
+            Permission::ReadTires,
+            Permission::ReadVehicleInfo,
+            Permission::ReadVin,
+        ])
     }
 }
 
 #[test]
 fn test_getting_scope_url_params_string() {
-    let permissions = ScopeBuilder::new().add_permissions(
-        [Permission::ReadEngineOil, Permission::ReadFuel, Permission::ReadVin]
-    );
+    let permissions = ScopeBuilder::new().add_permissions([
+        Permission::ReadEngineOil,
+        Permission::ReadFuel,
+        Permission::ReadVin,
+    ]);
 
     let expecting = "read_engine_oil read_fuel read_vin";
     assert_eq!(&permissions.query_value, expecting);

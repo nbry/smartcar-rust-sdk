@@ -23,11 +23,13 @@ pub(crate) async fn run_connect_flow(
     println!("connect - continue button pressed");
 
     // Brand Select
-    c.wait()
-        .for_element(Locator::Id("see-all-brands"))
-        .await?
-        .click()
-        .await?;
+    if make != "TESLA" {
+        c.wait()
+            .for_element(Locator::Id("see-all-brands"))
+            .await?
+            .click()
+            .await?;
+    }
 
     let brand_button = format!("button#{}.brand-list-item", make.to_uppercase());
     c.wait()

@@ -76,6 +76,16 @@ pub struct ChargingStatus {
     pub state: String,
 }
 
+/// The charge limit configuration for the vehicle
+///
+/// This is the struct representation for the response body of
+/// **GET** `https://api.smartcar.com/v2.0/vehicles/{id}/charge/limit`
+#[derive(Debug, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ChargeLimit {
+    pub limit: f32,
+}
+
 /// Status of the fuel remaining in the vehicle’s gas tank
 ///
 /// This is the struct representation for the response body of

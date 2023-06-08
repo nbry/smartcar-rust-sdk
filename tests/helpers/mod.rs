@@ -15,41 +15,53 @@ pub(crate) async fn run_connect_flow(
     c.goto(auth_url).await?;
 
     // Preamble
-    c.find(Locator::Css("button#continue-button"))
+    c.wait()
+        .for_element(Locator::Css("button#continue-button"))
         .await?
         .click()
         .await?;
     println!("connect - continue button pressed");
 
     // Brand Select
-    let brand_button = format!("button.brand-selector-button[data-make='{}']", make);
-    c.find(Locator::Css(brand_button.as_str()))
+    c.wait()
+        .for_element(Locator::Id("see-all-brands"))
+        .await?
+        .click()
+        .await?;
+
+    let brand_button = format!("button#{}.brand-list-item", make.to_uppercase());
+    c.wait()
+        .for_element(Locator::Css(brand_button.as_str()))
         .await?
         .click()
         .await?;
     println!("connect - brand selected: {}", make);
 
     // Log in
-    c.find(Locator::Css("#username"))
+    c.wait()
+        .for_element(Locator::Css("#username"))
         .await?
         .send_keys("test2@test.com")
         .await?;
     println!("connect - username typed");
 
-    c.find(Locator::Css("#password"))
+    c.wait()
+        .for_element(Locator::Css("#password"))
         .await?
         .send_keys("test-password")
         .await?;
     println!("connect - password typed");
 
-    c.find(Locator::Css("#sign-in-button"))
+    c.wait()
+        .for_element(Locator::Css("#sign-in-button"))
         .await?
         .click()
         .await?;
     println!("connect - sign in button pressed");
 
     // Permissions approval
-    c.find(Locator::Css("#approval-button"))
+    c.wait()
+        .for_element(Locator::Css("#approval-button"))
         .await?
         .click()
         .await?;

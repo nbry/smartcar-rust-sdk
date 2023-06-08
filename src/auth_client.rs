@@ -20,6 +20,12 @@ pub struct AuthUrlOptionsBuilder {
     pub flags: Option<HashMap<String, String>>,
 }
 
+impl Default for AuthUrlOptionsBuilder {
+    fn default() -> AuthUrlOptionsBuilder {
+        Self::new()
+    }
+}
+
 impl AuthUrlOptionsBuilder {
     pub fn new() -> AuthUrlOptionsBuilder {
         AuthUrlOptionsBuilder {
@@ -100,7 +106,7 @@ impl MultiQuery for AuthUrlOptionsBuilder {
         let mut query_string = Vec::new();
 
         if let Some(enabled) = self.force_prompt {
-            if enabled == true {
+            if enabled {
                 query_string.push(("approval_prompt".to_string(), "force".to_string()));
             }
         };
@@ -115,7 +121,7 @@ impl MultiQuery for AuthUrlOptionsBuilder {
 
         if let Some(flags) = &self.flags {
             let flag_query = format_flag_query(flags);
-            query_string.push(("flag".to_string(), flag_query.to_owned()));
+            query_string.push(("flag".to_string(), flag_query));
         }
 
         match &self.single_select_by_vin {
@@ -234,8 +240,8 @@ impl AuthClient {
 
         if let Some(opt) = options {
             let options_query = opt.multi_query();
-            if options_query.len() > 0 {
-                url.push_str("&");
+            if !options_query.is_empty() {
+                url.push('&');
                 url.push_str(&options_query);
             }
         }
@@ -244,7 +250,7 @@ impl AuthClient {
             url.push_str("&approval_prompt=auto");
         };
 
-        url.replace(" ", "%20")
+        url.replace(' ', "%20")
     }
 
     /// Exhange your oauth code for an access token
@@ -257,7 +263,7 @@ impl AuthClient {
             ("redirect_uri", &self.redirect_uri),
         ]);
 
-        let (res, meta) = SmartcarRequestBuilder::new(&get_oauth_url(), HttpVerb::POST)
+        let (res, meta) = SmartcarRequestBuilder::new(&get_oauth_url(), HttpVerb::Post)
             .add_header(
                 "Authorization",
                 &request::get_basic_b64_auth_header(&self.client_id, &self.client_secret),
@@ -284,7 +290,7 @@ impl AuthClient {
             ("refresh_token", refresh_token),
         ]);
 
-        let (res, meta) = SmartcarRequestBuilder::new(&get_oauth_url(), HttpVerb::POST)
+        let (res, meta) = SmartcarRequestBuilder::new(&get_oauth_url(), HttpVerb::Post)
             .add_header(
                 "Authorization",
                 &get_basic_b64_auth_header(&self.client_id, &self.client_secret),

@@ -19,14 +19,14 @@ pub(crate) trait MultiQuery {
         let mut query_string = String::from("");
         let query_vec = self.vectorize();
 
-        for i in 0..query_vec.len() {
+        for (i, _) in query_vec.iter().enumerate() {
             if i != 0 {
-                query_string.push_str("&");
+                query_string.push('&');
             }
 
             let (q, v) = query_vec[i].to_owned();
             query_string.push_str(&q);
-            query_string.push_str("=");
+            query_string.push('=');
             query_string.push_str(&v);
         }
 
@@ -47,9 +47,9 @@ pub(crate) fn get_basic_b64_auth_header(client_id: &str, client_secret: &str) ->
 }
 
 pub(crate) enum HttpVerb {
-    GET,
-    POST,
-    DELETE,
+    Get,
+    Post,
+    Delete,
 }
 
 #[derive(Debug)]
@@ -63,9 +63,9 @@ impl SmartcarRequestBuilder {
 
         SmartcarRequestBuilder {
             request: match verb {
-                HttpVerb::GET => client.get(url),
-                HttpVerb::POST => client.post(url),
-                HttpVerb::DELETE => client.delete(url),
+                HttpVerb::Get => client.get(url),
+                HttpVerb::Post => client.post(url),
+                HttpVerb::Delete => client.delete(url),
             },
         }
     }
@@ -94,7 +94,7 @@ impl SmartcarRequestBuilder {
 
         if res.status() != StatusCode::OK {
             let sc_err = res.json::<SmartcarError>().await?;
-            return Err(Error::SmartcarError(sc_err));
+            return Err(Error::SmartcarError(Box::new(sc_err)));
         }
 
         let meta = meta::generate_meta_from_headers(res.headers());

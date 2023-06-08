@@ -51,7 +51,7 @@ async fn login() -> Redirect {
     // Here we are adding the read_vehicle_info permission so we can get
     // the make, model, and year of the vehicle. In other words, we are asking
     // the vehicle owner for permission to get these attributes.
-    let scope = ScopeBuilder::new().add_permission(Permission::ReadVehicleInfo);
+    let scope = ScopeBuilder::new().add_permissions([Permission::ReadVehicleInfo]);
 
     // Here we build the options for creating the auth url.
     // This particular option forces the approval prompt page to show up.
@@ -83,7 +83,7 @@ async fn callback(q: Query<Callback>) -> impl IntoResponse {
     println!("\nStep 4a: Redirecting to /callback");
 
     // If user denies you access, you'll see this
-    if let Some(_) = &q.error {
+    if q.error.is_some() {
         return (
             StatusCode::EXPECTATION_FAILED,
             Json(json!("User delined during Smartcar Connect")),
@@ -96,9 +96,9 @@ async fn callback(q: Query<Callback>) -> impl IntoResponse {
     let code = &q.code.to_owned().unwrap();
     println!("\nResult: `code` query present in /callback:\n{}", code);
 
-    match get_attributes_handler(&code).await {
+    match get_attributes_handler(code).await {
         Err(_) => {
-            return (
+            (
                 StatusCode::EXPECTATION_FAILED,
                 Json(json!("attributes request failed")),
             )

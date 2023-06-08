@@ -19,7 +19,7 @@ pub fn hash_challenge(amt: &str, challenge: &str) -> Result<String, Error> {
 
 /// Verify webhook payload with AMT and signature.
 pub fn verify_payload(amt: &str, signature: &str, body: &str) -> Result<bool, Error> {
-    Ok(hash_challenge(amt, body)? == signature.to_string())
+    Ok(hash_challenge(amt, body)? == *signature)
 }
 
 #[test]
@@ -29,5 +29,5 @@ fn test_hash_challenge() {
     let hex_encoding = hash_challenge(amt, body).unwrap();
     let verified_payload = verify_payload(amt, &hex_encoding, body).unwrap();
 
-    assert!(verified_payload == true);
+    assert!(verified_payload);
 }

@@ -20,7 +20,7 @@ pub enum Error {
     MissingParameters(String),
 
     #[error("smartcar error::error response from smartcar api")]
-    SmartcarError(SmartcarError),
+    SmartcarError(Box<SmartcarError>),
 }
 
 /// A detailed error response from Smartcar API

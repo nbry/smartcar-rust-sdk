@@ -4,7 +4,7 @@
 //! Smartcar API lets you read vehicle data and send commands to vehicles using HTTP requests.
 //!
 //! To make requests to a vehicle from a web or mobile application, the end user must connect their vehicle
-//! using [Smartcar Connect](https://smartcar.com/docs/api#smartcar-connect). This flow follows the OAuth
+//! using [Smartcar Connect](https://smartcar.com/docs/connect/what-is-connect). This flow follows the OAuth
 //! spec and will return a `code` which can be used to obtain an access token from Smartcar.
 //!
 //! The Smartcar Rust SDK provides methods to:
@@ -39,7 +39,7 @@ pub mod webhooks;
 
 /// Return the id of the vehicle owner who granted access to your application.
 ///
-/// [More info on User](https://smartcar.com/docs/api/#get-user)
+/// [More info on User](https://smartcar.com/docs/api-reference/user)
 pub async fn get_user(acc: &Access) -> Result<(User, Meta), error::Error> {
     let url = format!("{api_url}/v2.0/user", api_url = get_api_url());
     let (res, meta) = SmartcarRequestBuilder::new(&url, HttpVerb::Get)
@@ -53,7 +53,7 @@ pub async fn get_user(acc: &Access) -> Result<(User, Meta), error::Error> {
 
 /// Return a list of the user's vehicle ids
 ///
-/// More info on [get all vehicles request](https://smartcar.com/api#get-all-vehicles)
+/// More info on [get all vehicles request](https://smartcar.com/docs/api-reference/all-vehicles)
 pub async fn get_vehicles(
     acc: &Access,
     limit: Option<i32>,
@@ -94,7 +94,8 @@ pub struct CompatibilityOptions {
 /// 1. If the car is compatible with smartcar
 /// 2. If the car is capable of the endpoints associated with each permisison
 ///
-/// [Compatibility API](https://smartcar.com/api#compatibility-api)
+/// [Compatibility API - By Vin](https://smartcar.com/docs/api-reference/compatibility/by-vin)
+/// [Compatibility API - By Region and Make](https://smartcar.com/docs/api-reference/compatibility/by-region-and-make)
 pub async fn get_compatibility(
     vin: &str,
     scope: &ScopeBuilder,
@@ -152,23 +153,30 @@ pub async fn get_compatibility(
 
 /// A permission that your application is requesting access to during SmartcarConnect
 ///
-/// [More info about Permissions](https://smartcar.com/docs/api/#permissions)
+/// [More info about Permissions](https://smartcar.com/docs/api-reference/permissions)
 #[derive(Deserialize, Debug, Eq, PartialEq, Hash, Clone, Copy)]
 pub enum Permission {
-    ReadCompass,     // Know the compass direction your vehicle is facing
-    ReadEngineOil,   // Read vehicle engine oil health
+    ControlCharge,   // Start or stop your vehicle's charging
+    ControlSecurity, // Lock or unlock your vehicle
     ReadBattery,     // Read EV battery's capacity and state of charge
     ReadCharge,      // Know whether vehicle is charging
-    ControlCharge,   // Start or stop your vehicle's charging
-    ReadThermometer, // Read temperatures from inside and outside the vehicle
+    ReadCompass,     // Know the compass direction your vehicle is facing
+    ReadEngineOil,   // Read vehicle engine oil health
     ReadFuel,        // Read fuel tank level
     ReadLocation,    // Access location
-    ControlSecurity, // Lock or unlock your vehicle
     ReadOdometer,    // Retrieve total distance traveled
+    ReadSecurity,    // Read the open/lock status of a vehicle's doors, windows, trunk, and hood
     ReadSpeedeomter, // Know your vehicle's speed
+    ReadThermometer, // Read temperatures from inside and outside the vehicle
     ReadTires,       // Read vehicle tire pressure
     ReadVehicleInfo, // Know make, model, and year
     ReadVin,         // Read VIN
+    // ReadChargeLocations,
+    // ReadChargeRecords,
+    // ReadChargeEvents,
+    // ReadClimate,
+    // ReadExtendedVehicleInfo,
+    // ControlClimate,
 }
 
 impl Permission {
@@ -184,10 +192,17 @@ impl Permission {
             Permission::ReadLocation => "read_location",
             Permission::ControlSecurity => "control_security",
             Permission::ReadOdometer => "read_odometer",
+            Permission::ReadSecurity => "read_security",
             Permission::ReadSpeedeomter => "read_speedometer",
             Permission::ReadTires => "read_tires",
             Permission::ReadVehicleInfo => "read_vehicle_info",
             Permission::ReadVin => "read_vin",
+            // Permission::ReadChargeLocations => "read_charge_locations",
+            // Permission::ReadChargeRecords => "read_charge_records",
+            // Permission::ReadChargeEvents => "read_charge_events",
+            // Permission::ReadClimate => "read_climate",
+            // Permission::ReadExtendedVehicleInfo => "read_extended_vehicle_info",
+            // Permission::ControlClimate => "control_climate",
         }
     }
 }
@@ -255,17 +270,18 @@ impl ScopeBuilder {
             query_value: String::from(""),
         }
         .add_permissions(vec![
-            Permission::ReadCompass,
-            Permission::ReadEngineOil,
+            Permission::ControlCharge,
+            Permission::ControlSecurity,
             Permission::ReadBattery,
             Permission::ReadCharge,
-            Permission::ControlCharge,
-            Permission::ReadThermometer,
+            Permission::ReadCompass,
+            Permission::ReadEngineOil,
             Permission::ReadFuel,
             Permission::ReadLocation,
-            Permission::ControlSecurity,
             Permission::ReadOdometer,
+            Permission::ReadSecurity,
             Permission::ReadSpeedeomter,
+            Permission::ReadThermometer,
             Permission::ReadTires,
             Permission::ReadVehicleInfo,
             Permission::ReadVin,

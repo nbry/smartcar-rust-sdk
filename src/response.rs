@@ -150,6 +150,29 @@ pub struct TirePressure {
     pub back_right: f32,
 }
 
+/// The open state of a door, window, sunroof, trunk, etc.
+#[derive(Debug, Deserialize, Serialize)]
+pub struct OpenStatus {
+    #[serde(rename = "type")]
+    pub _type: String,
+    pub status: String,
+}
+
+/// The lock status for a vehicle and the open status of its doors, windows, storage units, sunroof and charging port where available.
+///
+/// This is the struct representation for the response body of
+/// **GET** `https://api.smartcar.com/v2.0/vehicles/{id}/security`
+#[derive(Debug, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct LockStatus {
+    pub is_locked: bool,
+    pub doors: Vec<OpenStatus>,
+    pub windows: Vec<OpenStatus>,
+    pub sunroof: Vec<OpenStatus>,
+    pub storage: Vec<OpenStatus>,
+    pub charging_port: Vec<OpenStatus>,
+}
+
 /// The vehicle’s manufacturer identifier
 ///
 /// This is the struct representation for the response body of
@@ -270,11 +293,19 @@ pub enum SmartcarResponseBody {
     EngineOilLife(EngineOilLife),
     FuelTank(FuelTank),
     Location(Location),
+    LockStatus(LockStatus),
     Odometer(Odometer),
     TirePressure(TirePressure),
     VehicleAttributes(VehicleAttributes),
     Vin(Vin),
     SmartcarError(SmartcarError),
+    // ReadChargeLocations(),
+    // ReadChargeRecords(),
+    // ReadChargeEvents(),
+    // ReadClimate(),
+    // ReadExtendedVehicleInfo(),
+    // ControlClimate(),
+
 }
 
 /// Contains the response body AND metadata of a single endpoint in a batch request

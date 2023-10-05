@@ -12,7 +12,7 @@ use crate::request::{get_bearer_token_header, HttpVerb, SmartcarRequestBuilder};
 use crate::response::batch::build_batch_request_body;
 use crate::response::{
     Action, ApplicationPermissions, Batch, BatteryCapacity, BatteryLevel, ChargeLimit,
-    ChargingStatus, EngineOilLife, FuelTank, Location, Meta, Odometer, Status, Subscribe,
+    ChargingStatus, EngineOilLife, FuelTank, Location, LockStatus, Meta, Odometer, Status, Subscribe,
     TirePressure, VehicleAttributes, Vin,
 };
 
@@ -80,7 +80,7 @@ impl Vehicle {
     /// Returns a list of the permissions that have been granted to your application
     /// in relation to this vehicle
     ///
-    /// [GET - Application Permissions](https://smartcar.com/api#get-application-permissions)
+    /// [GET - Application Permissions](https://smartcar.com/docs/api-reference/application-permissions)
     pub async fn permissions(&self) -> Result<(ApplicationPermissions, Meta), Error> {
         let path = "/permissions";
         let (res, meta) = self
@@ -94,7 +94,7 @@ impl Vehicle {
 
     /// Returns the remaining life span of a vehicle’s engine oil.
     ///
-    /// [GET - Engine Oil](https://smartcar.com/api#get-engine-oil-life)
+    /// [GET - Engine Oil](https://smartcar.com/docs/api-reference/get-engine-oil-life)
     pub async fn engine_oil(&self) -> Result<(EngineOilLife, Meta), Error> {
         let path = "/engine/oil";
         let (res, meta) = self
@@ -108,7 +108,7 @@ impl Vehicle {
 
     /// Returns the total capacity of an electric vehicle's battery.
     ///
-    /// [GET - EV Battery Capacity](https://smartcar.com/api#get-ev-battery-capacity)
+    /// [GET - EV Battery Capacity](https://smartcar.com/docs/api-reference/evs/get-battery-capacity)
     pub async fn battery_capacity(&self) -> Result<(BatteryCapacity, Meta), Error> {
         let path = "/battery/capacity";
         let (res, meta) = self
@@ -122,7 +122,7 @@ impl Vehicle {
 
     /// Returns the state of charge (SOC) and the remaining range of an electric vehicle's battery.
     ///
-    /// [GET - EV Battery Level](https://smartcar.com/api#get-ev-battery-level)
+    /// [GET - EV Battery Level](https://smartcar.com/docs/api-reference/evs/get-battery-level)
     pub async fn battery_level(&self) -> Result<(BatteryLevel, Meta), Error> {
         let path = "/battery";
         let (res, meta) = self
@@ -136,7 +136,7 @@ impl Vehicle {
 
     /// Returns the current charge status of an electric vehicle.
     ///
-    /// [GET - EV Charging Status](https://smartcar.com/api#get-ev-charging-status)
+    /// [GET - EV Charging Status](https://smartcar.com/docs/api-reference/evs/get-charge-status)
     pub async fn charging_status(&self) -> Result<(ChargingStatus, Meta), Error> {
         let path = "/charge";
         let (res, meta) = self
@@ -150,7 +150,7 @@ impl Vehicle {
 
     /// Returns the current charge status of an electric vehicle.
     ///
-    /// [GET - EV Charge Limit](https://smartcar.com/api#get-ev-charge-limit-new)
+    /// [GET - EV Charge Limit](https://smartcar.com/docs/api-reference/evs/get-charge-limit)
     pub async fn charge_limit(&self) -> Result<(ChargeLimit, Meta), Error> {
         let path = "/charge/limit";
         let (res, meta) = self
@@ -165,7 +165,7 @@ impl Vehicle {
     /// Returns the status of the fuel remaining in the vehicle’s gas tank.
     /// Note: The fuel tank API is only available for vehicles sold in the United States.
     ///
-    /// [GET - Fuel Tank](https://smartcar.com/api#get-fuel-tank)
+    /// [GET - Fuel Tank](https://smartcar.com/docs/api-reference/get-fuel-tank)
     pub async fn fuel_tank(&self) -> Result<(FuelTank, Meta), Error> {
         let path = "/fuel";
         let (res, meta) = self
@@ -179,7 +179,7 @@ impl Vehicle {
 
     /// Returns the last known location of the vehicle in geographic coordinates.
     ///
-    /// [GET - Location](https://smartcar.com/api#get-location)
+    /// [GET - Location](https://smartcar.com/docs/api-reference/get-location)
     pub async fn location(&self) -> Result<(Location, Meta), Error> {
         let path = "/location";
         let (res, meta) = self
@@ -193,7 +193,7 @@ impl Vehicle {
 
     /// Returns the vehicle’s last known odometer reading.
     ///
-    /// [GET - Odometer](https://smartcar.com/api#get-odometer)
+    /// [GET - Odometer](https://smartcar.com/docs/api-reference/get-odometer)
     pub async fn odometer(&self) -> Result<(Odometer, Meta), Error> {
         let path = "/odometer";
         let (res, meta) = self
@@ -207,7 +207,7 @@ impl Vehicle {
 
     /// Returns the air pressure of each of the vehicle’s tires.
     ///
-    /// [GET - Tire Pressure](https://smartcar.com/api#get-tire-pressure)
+    /// [GET - Tire Pressure](https://smartcar.com/docs/api-reference/get-tire-pressure)
     pub async fn tire_pressure(&self) -> Result<(TirePressure, Meta), Error> {
         let path = "/tires/pressure";
         let (res, meta) = self
@@ -219,9 +219,24 @@ impl Vehicle {
         Ok((data, meta))
     }
 
+    /// Returns the lock status for a vehicle and the open status of its doors,
+    /// windows, storage units, sunroof and charging port where available.
+    ///
+    /// [GET - Lock Status](https://smartcar.com/docs/api-reference/get-lock-status)
+    pub async fn lock_status(&self) -> Result<(LockStatus, Meta), Error> {
+        let path = "/security";
+        let (res, meta) = self
+            .get_request_builder(path, HttpVerb::Get)
+            .send()
+            .await?;
+        let data = res.json::<LockStatus>().await?;
+
+        Ok((data, meta))
+    }
+
     /// Returns a single vehicle object, containing identifying information.
     ///
-    /// [GET - Vehicle Attributes](https://smartcar.com/api#get-vehicle-attributes)
+    /// [GET - Vehicle Info](https://smartcar.com/docs/api-reference/get-vehicle-info)
     pub async fn attributes(&self) -> Result<(VehicleAttributes, Meta), Error> {
         let path = "/";
         let (res, meta) = self
@@ -235,7 +250,7 @@ impl Vehicle {
 
     /// Returns the vehicle’s manufacturer identifier.
     ///
-    /// [GET - VIN](https://smartcar.com/api#get-vin)
+    /// [GET - VIN](https://smartcar.com/docs/api-reference/get-vin)
     pub async fn vin(&self) -> Result<(Vin, Meta), Error> {
         let path = "/vin";
         let (res, meta) = self
@@ -249,7 +264,7 @@ impl Vehicle {
 
     /// Lock the vehicle.
     ///
-    /// [POST - Lock/Unlock Doors](https://smartcar.com/api#post-lockunlock)
+    /// [POST - Lock/Unlock Doors](https://smartcar.com/docs/api-reference/control-lock-unlock)
     pub async fn lock(&self) -> Result<(Action, Meta), Error> {
         let path = "/security";
         let req_body = json!({ "action": "LOCK"});
@@ -265,7 +280,7 @@ impl Vehicle {
 
     /// Unlock the vehicle.
     ///
-    /// [POST - Lock/Unlock Doors](https://smartcar.com/api#post-lockunlock)
+    /// [POST - Lock/Unlock Doors](https://smartcar.com/docs/api-reference/control-lock-unlock)
     pub async fn unlock(&self) -> Result<(Action, Meta), Error> {
         let path = "/securiy";
         let req_body = json!({ "action": "UNLOCK"});
@@ -281,7 +296,7 @@ impl Vehicle {
 
     /// Start charging an electric vehicle.
     ///
-    /// [POST - Start/Stop Charge](https://smartcar.com/api#post-ev-startstop-charge)
+    /// [POST - Start/Stop Charge](https://smartcar.com/docs/api-reference/evs/control-charge)
     pub async fn start_charge(&self) -> Result<(Action, Meta), Error> {
         let path = "/charge";
         let req_body = json!({ "action": "START"});
@@ -297,7 +312,7 @@ impl Vehicle {
 
     /// Stop charging an electric vehicle.
     ///
-    /// [POST - Start/Stop Charge](https://smartcar.com/api#post-ev-startstop-charge)
+    /// [POST - Start/Stop Charge](https://smartcar.com/docs/api-reference/evs/control-charge)
     pub async fn stop_charge(&self) -> Result<(Action, Meta), Error> {
         let path = "/charge";
         let req_body = json!({ "action": "STOP"});
@@ -313,7 +328,7 @@ impl Vehicle {
 
     /// Set the charge limit configuration for the vehicle
     ///
-    /// [POST - EV Charge Limit](https://smartcar.com/api#post-ev-charge-limit-new)
+    /// [POST - EV Charge Limit](https://smartcar.com/docs/api-reference/evs/get-charge-limit)
     pub async fn set_charge_limit(&self, limit: f32) -> Result<(Action, Meta), Error> {
         let path = "/charge/limit";
         let req_body = json!({ "limit": limit });
@@ -329,7 +344,7 @@ impl Vehicle {
 
     /// Returns a list of responses from multiple Smartcar endpoints, all combined into a single request.
     ///
-    /// [POST - Batch Request](https://smartcar.com/api#post-batch-request)
+    /// [POST - Batch Request](https://smartcar.com/docs/api-reference/batch)
     pub async fn batch(&self, paths: Vec<String>) -> Result<(Batch, Meta), Error> {
         let path = "/batch";
         let req_body = build_batch_request_body(paths)?;
@@ -345,7 +360,7 @@ impl Vehicle {
 
     /// Revoke access for the current requesting application.
     ///
-    /// [DELETE - Disconnect](https://smartcar.com/api#delete-disconnect)
+    /// [DELETE - Disconnect](https://smartcar.com/docs/api-reference/delete-disconnect)
     pub async fn disconnect(&self) -> Result<(Status, Meta), Error> {
         let path = "/application";
         let (res, meta) = self
@@ -359,7 +374,7 @@ impl Vehicle {
 
     /// Subscribe a vehicle to a webhook
     ///
-    /// [POST - Subscribe to Webhook](https://smartcar.com/api#post-subscribe)
+    /// [POST - Subscribe to Webhook](https://smartcar.com/docs/api-reference/webhooks/subscribe-webhook)
     pub async fn subscribe(&self, webhook_id: &str) -> Result<(Subscribe, Meta), Error> {
         let path = format!("/webhooks/{}", webhook_id);
         let (res, meta) = self
@@ -377,7 +392,7 @@ impl Vehicle {
     /// - `amt` - The Application Management Token found on Smartcar Dashbaord
     /// - `webhook_id` - The id of the webhook, found in your dashboard
     ///
-    /// [DELETE - Unsubscribe from Webhook](https://smartcar.com/api#delete-unsubscribe)
+    /// [DELETE - Unsubscribe from Webhook](https://smartcar.com/docs/api-reference/webhooks/unsubscribe-webhook)
     pub async fn unsubscribe(
         &self,
         amt: &str,

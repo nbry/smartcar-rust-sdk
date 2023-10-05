@@ -72,6 +72,9 @@ async fn full_e2e_bev() -> Result<(), Box<dyn std::error::Error>> {
     let fuel_tank = v.fuel_tank().await;
     assert!(fuel_tank.is_err());
 
+    let lock_status = v.lock_status().await?;
+    println!("lock_status: {:#?}", lock_status);
+
     // Using general purpose request to get brand specific endpoint
     let compass = v
         .request("/tesla/compass", HttpVerb::Get, None, None)

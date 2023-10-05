@@ -4,7 +4,6 @@ use url::Url;
 
 pub(crate) async fn run_connect_flow(
     auth_url: &str,
-    make: &str,
     port: &str,
 ) -> Result<String, fantoccini::error::CmdError> {
     let c = ClientBuilder::native()
@@ -23,21 +22,7 @@ pub(crate) async fn run_connect_flow(
     println!("connect - continue button pressed");
 
     // Brand Select
-    if make != "TESLA" {
-        c.wait()
-            .for_element(Locator::Id("see-all-brands"))
-            .await?
-            .click()
-            .await?;
-    }
-
-    let brand_button = format!("button#{}.brand-list-item", make.to_uppercase());
-    c.wait()
-        .for_element(Locator::Css(brand_button.as_str()))
-        .await?
-        .click()
-        .await?;
-    println!("connect - brand selected: {}", make);
+    // Tests should use make_bypass to remove the brand selection step
 
     // Log in
     c.wait()

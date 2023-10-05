@@ -19,11 +19,15 @@ async fn full_e2e_bev() -> Result<(), Box<dyn std::error::Error>> {
 
     // SET UP AUTH CLIENT
     let ac = AuthClient::new(&client_id, &client_secret, &redirect_uri, true);
-    let get_auth_url_options = AuthUrlOptionsBuilder::new().set_force_prompt(true);
+    let get_auth_url_options = AuthUrlOptionsBuilder::new()
+        .set_force_prompt(true)
+        .set_make_bypass(String::from("TESLA"));
 
     // GET ACCESS TOKEN
     let url = ac.get_auth_url(&scope, Some(&get_auth_url_options));
-    let code = run_connect_flow(&url, "TESLA", "4444").await?;
+    print!("{}", url);
+
+    let code = run_connect_flow(&url, "4444").await?;
     let (access, _) = ac.exchange_code(&code).await?;
     let access_token = &access.access_token;
 
@@ -130,11 +134,13 @@ async fn full_e2e_ice() -> Result<(), Box<dyn std::error::Error>> {
 
     // SET UP AUTH CLIENT
     let ac = AuthClient::new(&client_id, &client_secret, &redirect_uri, true);
-    let get_auth_url_options = AuthUrlOptionsBuilder::new().set_force_prompt(true);
+    let get_auth_url_options = AuthUrlOptionsBuilder::new()
+        .set_force_prompt(true)
+        .set_make_bypass(String::from("BUICK"));
 
     // GET TOKENS
     let url = ac.get_auth_url(&scope, Some(&get_auth_url_options));
-    let code = run_connect_flow(&url, "BUICK", "4444").await?;
+    let code = run_connect_flow(&url, "4444").await?;
     let (access, _) = ac.exchange_code(&code).await?;
 
     // TRY A REFRESH TOKEN EXCHANGE

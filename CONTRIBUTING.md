@@ -40,5 +40,4 @@ Therefore, we really only need to check if there is a new permission related to 
 
 1. Check if we have a new permission associated with the endpoint
   - Add permission to the public enum `Permission` in ./lib.rs
-  - Add permission to the vector in `ScopeBuilder.with_all_permissions`
 

@@ -156,53 +156,55 @@ pub async fn get_compatibility(
 /// [More info about Permissions](https://smartcar.com/docs/api-reference/permissions)
 #[derive(Deserialize, Debug, Eq, PartialEq, Hash, Clone, Copy)]
 pub enum Permission {
-    ControlCharge,   // Start or stop your vehicle's charging
-    ControlSecurity, // Lock or unlock your vehicle
-    ReadBattery,     // Read EV battery's capacity and state of charge
-    ReadCharge,      // Know whether vehicle is charging
-    ReadCompass,     // Know the compass direction your vehicle is facing
-    ReadEngineOil,   // Read vehicle engine oil health
-    ReadFuel,        // Read fuel tank level
-    ReadLocation,    // Access location
-    ReadOdometer,    // Retrieve total distance traveled
-    ReadSecurity,    // Read the open/lock status of a vehicle's doors, windows, trunk, and hood
-    ReadSpeedeomter, // Know your vehicle's speed
-    ReadThermometer, // Read temperatures from inside and outside the vehicle
-    ReadTires,       // Read vehicle tire pressure
-    ReadVehicleInfo, // Know make, model, and year
-    ReadVin,         // Read VIN
-    // ReadChargeLocations,
-    // ReadChargeRecords,
-    // ReadChargeEvents,
-    // ReadClimate,
-    // ReadExtendedVehicleInfo,
-    // ControlClimate,
+    // Core Endpoint Permissions:
+    ControlCharge,
+    ControlSecurity,
+    ReadBattery,
+    ReadCharge,
+    ReadEngineOil,
+    ReadFuel,
+    ReadLocation,
+    ReadOdometer,
+    ReadSecurity,
+    ReadTires,
+    ReadVehicleInfo,
+    ReadVin,
+    // Make-Specific Permissions:
+    ControlClimate,
+    ReadChargeEvents,
+    ReadChargeLocations,
+    ReadChargeRecords,
+    ReadClimate,
+    ReadCompass,
+    ReadExtendedVehicleInfo,
+    ReadSpeedeomter,
+    ReadThermometer,
 }
 
 impl Permission {
     fn as_str(&self) -> &str {
         match self {
-            Permission::ReadCompass => "read_compass",
-            Permission::ReadEngineOil => "read_engine_oil",
+            Permission::ControlCharge => "control_charge",
+            Permission::ControlClimate => "control_climate",
+            Permission::ControlSecurity => "control_security",
             Permission::ReadBattery => "read_battery",
             Permission::ReadCharge => "read_charge",
-            Permission::ControlCharge => "control_charge",
-            Permission::ReadThermometer => "read_thermometer",
+            Permission::ReadChargeEvents => "read_charge_events",
+            Permission::ReadChargeLocations => "read_charge_locations",
+            Permission::ReadChargeRecords => "read_charge_records",
+            Permission::ReadClimate => "read_climate",
+            Permission::ReadCompass => "read_compass",
+            Permission::ReadEngineOil => "read_engine_oil",
+            Permission::ReadExtendedVehicleInfo => "read_extended_vehicle_info",
             Permission::ReadFuel => "read_fuel",
             Permission::ReadLocation => "read_location",
-            Permission::ControlSecurity => "control_security",
             Permission::ReadOdometer => "read_odometer",
             Permission::ReadSecurity => "read_security",
             Permission::ReadSpeedeomter => "read_speedometer",
+            Permission::ReadThermometer => "read_thermometer",
             Permission::ReadTires => "read_tires",
             Permission::ReadVehicleInfo => "read_vehicle_info",
             Permission::ReadVin => "read_vin",
-            // Permission::ReadChargeLocations => "read_charge_locations",
-            // Permission::ReadChargeRecords => "read_charge_records",
-            // Permission::ReadChargeEvents => "read_charge_events",
-            // Permission::ReadClimate => "read_climate",
-            // Permission::ReadExtendedVehicleInfo => "read_extended_vehicle_info",
-            // Permission::ControlClimate => "control_climate",
         }
     }
 }
@@ -263,7 +265,7 @@ impl ScopeBuilder {
         self
     }
 
-    /// Create a ScopeBuilder with all available permissions
+    /// Create a ScopeBuilder with all available permissions, not including the make-specific permissions
     pub fn with_all_permissions() -> ScopeBuilder {
         ScopeBuilder {
             permissions: HashSet::new(),
@@ -274,17 +276,19 @@ impl ScopeBuilder {
             Permission::ControlSecurity,
             Permission::ReadBattery,
             Permission::ReadCharge,
-            Permission::ReadCompass,
             Permission::ReadEngineOil,
             Permission::ReadFuel,
             Permission::ReadLocation,
             Permission::ReadOdometer,
             Permission::ReadSecurity,
-            Permission::ReadSpeedeomter,
-            Permission::ReadThermometer,
             Permission::ReadTires,
             Permission::ReadVehicleInfo,
             Permission::ReadVin,
+            // Upcoming Breaking Change: These following permissions will be removed
+            // in the next patch, as they are make-specific permissions
+            Permission::ReadCompass,
+            Permission::ReadSpeedeomter,
+            Permission::ReadThermometer,
         ])
     }
 }

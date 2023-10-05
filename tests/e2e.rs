@@ -97,12 +97,15 @@ async fn full_e2e_bev() -> Result<(), Box<dyn std::error::Error>> {
         client_secret: Some(client_secret),
         flags: None,
     };
-    let compatibility_scope = ScopeBuilder::new().add_permissions(vec![
-        Permission::ReadBattery,
-        Permission::ReadFuel,
-    ]);
-    let compatiblity =
-        smartcar::get_compatibility(&vin.0.vin, &compatibility_scope, "US", Some(compatibility_opts)).await?;
+    let compatibility_scope =
+        ScopeBuilder::new().add_permissions(vec![Permission::ReadBattery, Permission::ReadFuel]);
+    let compatiblity = smartcar::get_compatibility(
+        &vin.0.vin,
+        &compatibility_scope,
+        "US",
+        Some(compatibility_opts),
+    )
+    .await?;
     println!("compatibility: {:#?}", compatiblity);
 
     // Vehicle Management

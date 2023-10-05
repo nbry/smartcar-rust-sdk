@@ -400,3 +400,25 @@ fn test_getting_scope_url_params_string() {
     let expecting = "read_engine_oil read_fuel read_vin";
     assert_eq!(&permissions.query_value, expecting);
 }
+
+#[test]
+fn test_delete_connections_filter_both_options() {
+    let filter_with_both_options = DeleteConnectionsFilters {
+        vehicle_id: Some(String::from("vehicle_id")),
+        user_id: Some(String::from("user_id")),
+    };
+
+    let result = filter_with_both_options.validate();
+    assert!(result.is_err());
+}
+
+#[test]
+fn test_delete_connections_neither_option() {
+    let filter_with_neither_option = DeleteConnectionsFilters {
+        vehicle_id: None,
+        user_id: None,
+    };
+
+    let result = filter_with_neither_option.validate();
+    assert!(result.is_err());
+}

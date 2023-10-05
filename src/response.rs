@@ -263,10 +263,11 @@ pub struct Meta {
 #[serde(untagged)]
 pub enum SmartcarResponseBody {
     ApplicationPermissions(ApplicationPermissions),
-    EngineOilLife(EngineOilLife),
     BatteryCapacity(BatteryCapacity),
     BatteryLevel(BatteryLevel),
+    ChargeLimit(ChargeLimit),
     ChargingStatus(ChargingStatus),
+    EngineOilLife(EngineOilLife),
     FuelTank(FuelTank),
     Location(Location),
     Odometer(Odometer),

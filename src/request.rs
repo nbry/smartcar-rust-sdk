@@ -36,12 +36,12 @@ pub(crate) trait MultiQuery {
 
 /// -> `Bearer <access_token>`
 pub(crate) fn get_bearer_token_header(access_token: &str) -> String {
-    format!("Bearer {}", access_token)
+    format!("Bearer {access_token}")
 }
 
-/// -> `Basic <base64('client_id:client_secrret')>`
-pub(crate) fn get_basic_b64_auth_header(client_id: &str, client_secret: &str) -> String {
-    let credentials = format!("{}:{}", client_id, client_secret);
+/// -> `Basic <base64('username:password')>`
+pub(crate) fn get_basic_b64_auth_header(username: &str, password: &str) -> String {
+    let credentials = format!("{}:{}", username, password);
     let encoded = base64::encode(credentials.as_bytes());
     format!("Basic {}", &encoded)
 }
@@ -49,6 +49,7 @@ pub(crate) fn get_basic_b64_auth_header(client_id: &str, client_secret: &str) ->
 pub enum HttpVerb {
     Get,
     Post,
+    Put,
     Delete,
 }
 
@@ -65,6 +66,7 @@ impl SmartcarRequestBuilder {
             request: match verb {
                 HttpVerb::Get => client.get(url),
                 HttpVerb::Post => client.post(url),
+                HttpVerb::Put => client.put(url),
                 HttpVerb::Delete => client.delete(url),
             },
         }

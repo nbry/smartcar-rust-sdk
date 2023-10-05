@@ -150,6 +150,29 @@ pub struct TirePressure {
     pub back_right: f32,
 }
 
+/// The open state of a door, window, sunroof, trunk, etc.
+#[derive(Debug, Deserialize, Serialize)]
+pub struct OpenStatus {
+    #[serde(rename = "type")]
+    pub _type: String,
+    pub status: String,
+}
+
+/// The lock status for a vehicle and the open status of its doors, windows, storage units, sunroof and charging port where available.
+///
+/// This is the struct representation for the response body of
+/// **GET** `https://api.smartcar.com/v2.0/vehicles/{id}/security`
+#[derive(Debug, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct LockStatus {
+    pub is_locked: bool,
+    pub doors: Vec<OpenStatus>,
+    pub windows: Vec<OpenStatus>,
+    pub sunroof: Vec<OpenStatus>,
+    pub storage: Vec<OpenStatus>,
+    pub charging_port: Vec<OpenStatus>,
+}
+
 /// The vehicle’s manufacturer identifier
 ///
 /// This is the struct representation for the response body of
@@ -243,6 +266,47 @@ pub struct Compatibility {
     pub capabilities: Vec<Capability>,
 }
 
+#[derive(Debug, Deserialize, Serialize)]
+pub struct PagingCursor {
+    pub cursor: Option<String>,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct GetConnection {
+    pub user_id: String,
+    pub vehicle_id: String,
+    pub connected_at: String,
+    pub mode: String,
+}
+
+/// A paged list of all vehicles that are connected to the application associated with the
+/// management API token used, sorted in descending order by connection date.
+///
+/// This is the struct representation for the response body of
+/// **GET** `https://smartcar.com/docs/api-reference/management/get-vehicle-connections`
+#[derive(Debug, Deserialize, Serialize)]
+pub struct GetConnections {
+    pub connections: Vec<GetConnection>,
+    pub paging: PagingCursor,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct DeleteConnection {
+    pub user_id: String,
+    pub vehicle_id: String,
+}
+
+/// Deleted vehicle connections associated with a Smartcar user ID or a specific vehicle.
+///
+/// This is the struct representation for the response body of
+/// **DELETE** `https://smartcar.com/docs/api-reference/management/delete-vehicle-connections`
+#[derive(Debug, Deserialize, Serialize)]
+pub struct DeleteConnections {
+    pub connections: Vec<DeleteConnection>,
+}
+
 /// Smartcar headers from a response
 ///
 /// [More info on Smartcar Response Headers](https://smartcar.com/docs/api/#response-headers)
@@ -263,17 +327,25 @@ pub struct Meta {
 #[serde(untagged)]
 pub enum SmartcarResponseBody {
     ApplicationPermissions(ApplicationPermissions),
-    EngineOilLife(EngineOilLife),
     BatteryCapacity(BatteryCapacity),
     BatteryLevel(BatteryLevel),
+    ChargeLimit(ChargeLimit),
     ChargingStatus(ChargingStatus),
+    EngineOilLife(EngineOilLife),
     FuelTank(FuelTank),
     Location(Location),
+    LockStatus(LockStatus),
     Odometer(Odometer),
     TirePressure(TirePressure),
     VehicleAttributes(VehicleAttributes),
     Vin(Vin),
     SmartcarError(SmartcarError),
+    // ReadChargeLocations(),
+    // ReadChargeRecords(),
+    // ReadChargeEvents(),
+    // ReadClimate(),
+    // ReadExtendedVehicleInfo(),
+    // ControlClimate(),
 }
 
 /// Contains the response body AND metadata of a single endpoint in a batch request

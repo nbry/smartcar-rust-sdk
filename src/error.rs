@@ -21,6 +21,9 @@ pub enum Error {
 
     #[error("smartcar error::error response from smartcar api")]
     SmartcarError(Box<SmartcarError>),
+
+    #[error("choose ONE of vehicle_id OR user_id as a filter")]
+    DeleteConnectionsFilterValidationError,
 }
 
 /// A detailed error response from Smartcar API

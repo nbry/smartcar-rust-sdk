@@ -97,12 +97,10 @@ async fn callback(q: Query<Callback>) -> impl IntoResponse {
     println!("\nResult: `code` query present in /callback:\n{}", code);
 
     match get_attributes_handler(code).await {
-        Err(_) => {
-            (
-                StatusCode::EXPECTATION_FAILED,
-                Json(json!("attributes request failed")),
-            )
-        }
+        Err(_) => (
+            StatusCode::EXPECTATION_FAILED,
+            Json(json!("attributes request failed")),
+        ),
         Ok((attributes, _)) => {
             (
                 StatusCode::OK,

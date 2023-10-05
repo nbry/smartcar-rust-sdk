@@ -4,7 +4,7 @@
 //! Smartcar API lets you read vehicle data and send commands to vehicles using HTTP requests.
 //!
 //! To make requests to a vehicle from a web or mobile application, the end user must connect their vehicle
-//! using [Smartcar Connect](https://smartcar.com/docs/api#smartcar-connect). This flow follows the OAuth
+//! using [Smartcar Connect](https://smartcar.com/docs/connect/what-is-connect). This flow follows the OAuth
 //! spec and will return a `code` which can be used to obtain an access token from Smartcar.
 //!
 //! The Smartcar Rust SDK provides methods to:
@@ -26,9 +26,9 @@ use std::{
     env,
 };
 
-use helpers::{format_flag_query, get_api_url};
+use helpers::{format_flag_query, get_api_url, get_management_url};
 use request::{get_bearer_token_header, HttpVerb, SmartcarRequestBuilder};
-use response::{Access, Compatibility, Meta, User, Vehicles};
+use response::{Access, Compatibility, DeleteConnections, GetConnections, Meta, User, Vehicles};
 
 pub mod auth_client;
 pub mod error;
@@ -39,7 +39,7 @@ pub mod webhooks;
 
 /// Return the id of the vehicle owner who granted access to your application.
 ///
-/// [More info on User](https://smartcar.com/docs/api/#get-user)
+/// [More info on User](https://smartcar.com/docs/api-reference/user)
 pub async fn get_user(acc: &Access) -> Result<(User, Meta), error::Error> {
     let url = format!("{api_url}/v2.0/user", api_url = get_api_url());
     let (res, meta) = SmartcarRequestBuilder::new(&url, HttpVerb::Get)
@@ -53,7 +53,7 @@ pub async fn get_user(acc: &Access) -> Result<(User, Meta), error::Error> {
 
 /// Return a list of the user's vehicle ids
 ///
-/// More info on [get all vehicles request](https://smartcar.com/api#get-all-vehicles)
+/// More info on [get all vehicles request](https://smartcar.com/docs/api-reference/all-vehicles)
 pub async fn get_vehicles(
     acc: &Access,
     limit: Option<i32>,
@@ -94,7 +94,8 @@ pub struct CompatibilityOptions {
 /// 1. If the car is compatible with smartcar
 /// 2. If the car is capable of the endpoints associated with each permisison
 ///
-/// [Compatibility API](https://smartcar.com/api#compatibility-api)
+/// [Compatibility API - By Vin](https://smartcar.com/docs/api-reference/compatibility/by-vin)
+/// [Compatibility API - By Region and Make](https://smartcar.com/docs/api-reference/compatibility/by-region-and-make)
 pub async fn get_compatibility(
     vin: &str,
     scope: &ScopeBuilder,
@@ -150,41 +151,153 @@ pub async fn get_compatibility(
     Ok((data, meta))
 }
 
+/// Options for get_connections
+pub struct GetConnectionsFilters {
+    pub vehicle_id: Option<String>,
+    pub user_id: Option<String>,
+}
+
+/// Paging options for get_connections
+pub struct GetConnectionsPaging {
+    pub cursor_id: Option<String>,
+    pub limit: Option<i32>,
+}
+
+/// Returns a paged list of all vehicles that are connected to the application
+/// associated with the management API token used, sorted in descending order by connection date.
+///
+/// More info on [get vehicle connections](https://smartcar.com/docs/api-reference/management/get-vehicle-connections)
+pub async fn get_connections(
+    amt: &str,
+    filter: Option<GetConnectionsFilters>,
+    paging: Option<GetConnectionsPaging>,
+) -> Result<(GetConnections, Meta), error::Error> {
+    let url = format!("{}/v2.0/management/connections/", get_management_url());
+    let mut req = SmartcarRequestBuilder::new(&url, HttpVerb::Get).add_header(
+        "Authorization",
+        &request::get_basic_b64_auth_header("default", &amt),
+    );
+    if let Some(filter) = filter {
+        if let Some(vehicle_id) = filter.vehicle_id {
+            req = req.add_query("vehicle_id", vehicle_id.as_str())
+        }
+        if let Some(user_id) = filter.user_id {
+            req = req.add_query("user_id", user_id.as_str())
+        }
+    }
+    if let Some(paging) = paging {
+        if let Some(cursor_id) = paging.cursor_id {
+            req = req.add_query("cursor_id", cursor_id.as_str())
+        }
+        if let Some(limit) = paging.limit {
+            req = req.add_query("limit", limit.to_string().as_str())
+        }
+    }
+    let (res, meta) = req.send().await?;
+    let data = res.json::<GetConnections>().await?;
+
+    Ok((data, meta))
+}
+
+pub struct DeleteConnectionsFilters {
+    pub vehicle_id: Option<String>,
+    pub user_id: Option<String>,
+}
+
+impl DeleteConnectionsFilters {
+    // Filter must have only one of vehicle_id OR user_id
+    fn validate(&self) -> Result<(), error::Error> {
+        if self.vehicle_id.is_some() && self.user_id.is_some() {
+            return Err(error::Error::DeleteConnectionsFilterValidationError);
+        }
+        if self.vehicle_id.is_none() && self.user_id.is_none() {
+            return Err(error::Error::DeleteConnectionsFilterValidationError);
+        }
+
+        Ok(())
+    }
+}
+
+/// Deletes all vehicle connections associated with a Smartcar user ID or a specific vehicle.
+///
+/// More info on [delete vehicle connections](https://smartcar.com/docs/api-reference/management/delete-vehicle-connections)
+pub async fn delete_connections(
+    amt: &str,
+    filter: Option<DeleteConnectionsFilters>,
+) -> Result<(DeleteConnections, Meta), error::Error> {
+    let url = format!("{}/v2.0/management/connections/", get_management_url());
+    let mut req = SmartcarRequestBuilder::new(&url, HttpVerb::Delete).add_header(
+        "Authorization",
+        &request::get_basic_b64_auth_header("default", &amt),
+    );
+    if let Some(filter) = filter {
+        if let Err(validation_error) = filter.validate() {
+            return Err(validation_error);
+        }
+        if let Some(vehicle_id) = filter.vehicle_id {
+            req = req.add_query("vehicle_id", vehicle_id.as_str())
+        }
+        if let Some(user_id) = filter.user_id {
+            req = req.add_query("user_id", user_id.as_str())
+        }
+    }
+    let (res, meta) = req.send().await?;
+    let data = res.json::<DeleteConnections>().await?;
+
+    Ok((data, meta))
+}
+
 /// A permission that your application is requesting access to during SmartcarConnect
 ///
-/// [More info about Permissions](https://smartcar.com/docs/api/#permissions)
+/// [More info about Permissions](https://smartcar.com/docs/api-reference/permissions)
 #[derive(Deserialize, Debug, Eq, PartialEq, Hash, Clone, Copy)]
 pub enum Permission {
-    ReadCompass,     // Know the compass direction your vehicle is facing
-    ReadEngineOil,   // Read vehicle engine oil health
-    ReadBattery,     // Read EV battery's capacity and state of charge
-    ReadCharge,      // Know whether vehicle is charging
-    ControlCharge,   // Start or stop your vehicle's charging
-    ReadThermometer, // Read temperatures from inside and outside the vehicle
-    ReadFuel,        // Read fuel tank level
-    ReadLocation,    // Access location
-    ControlSecurity, // Lock or unlock your vehicle
-    ReadOdometer,    // Retrieve total distance traveled
-    ReadSpeedeomter, // Know your vehicle's speed
-    ReadTires,       // Read vehicle tire pressure
-    ReadVehicleInfo, // Know make, model, and year
-    ReadVin,         // Read VIN
+    // Core Endpoint Permissions:
+    ControlCharge,
+    ControlSecurity,
+    ReadBattery,
+    ReadCharge,
+    ReadEngineOil,
+    ReadFuel,
+    ReadLocation,
+    ReadOdometer,
+    ReadSecurity,
+    ReadTires,
+    ReadVehicleInfo,
+    ReadVin,
+    // Make-Specific Permissions:
+    ControlClimate,
+    ReadChargeEvents,
+    ReadChargeLocations,
+    ReadChargeRecords,
+    ReadClimate,
+    ReadCompass,
+    ReadExtendedVehicleInfo,
+    ReadSpeedeomter,
+    ReadThermometer,
 }
 
 impl Permission {
     fn as_str(&self) -> &str {
         match self {
-            Permission::ReadCompass => "read_compass",
-            Permission::ReadEngineOil => "read_engine_oil",
+            Permission::ControlCharge => "control_charge",
+            Permission::ControlClimate => "control_climate",
+            Permission::ControlSecurity => "control_security",
             Permission::ReadBattery => "read_battery",
             Permission::ReadCharge => "read_charge",
-            Permission::ControlCharge => "control_charge",
-            Permission::ReadThermometer => "read_thermometer",
+            Permission::ReadChargeEvents => "read_charge_events",
+            Permission::ReadChargeLocations => "read_charge_locations",
+            Permission::ReadChargeRecords => "read_charge_records",
+            Permission::ReadClimate => "read_climate",
+            Permission::ReadCompass => "read_compass",
+            Permission::ReadEngineOil => "read_engine_oil",
+            Permission::ReadExtendedVehicleInfo => "read_extended_vehicle_info",
             Permission::ReadFuel => "read_fuel",
             Permission::ReadLocation => "read_location",
-            Permission::ControlSecurity => "control_security",
             Permission::ReadOdometer => "read_odometer",
+            Permission::ReadSecurity => "read_security",
             Permission::ReadSpeedeomter => "read_speedometer",
+            Permission::ReadThermometer => "read_thermometer",
             Permission::ReadTires => "read_tires",
             Permission::ReadVehicleInfo => "read_vehicle_info",
             Permission::ReadVin => "read_vin",
@@ -248,27 +361,30 @@ impl ScopeBuilder {
         self
     }
 
-    /// Create a ScopeBuilder with all available permissions
+    /// Create a ScopeBuilder with all available permissions, not including the make-specific permissions
     pub fn with_all_permissions() -> ScopeBuilder {
         ScopeBuilder {
             permissions: HashSet::new(),
             query_value: String::from(""),
         }
         .add_permissions(vec![
-            Permission::ReadCompass,
-            Permission::ReadEngineOil,
+            Permission::ControlCharge,
+            Permission::ControlSecurity,
             Permission::ReadBattery,
             Permission::ReadCharge,
-            Permission::ControlCharge,
-            Permission::ReadThermometer,
+            Permission::ReadEngineOil,
             Permission::ReadFuel,
             Permission::ReadLocation,
-            Permission::ControlSecurity,
             Permission::ReadOdometer,
-            Permission::ReadSpeedeomter,
+            Permission::ReadSecurity,
             Permission::ReadTires,
             Permission::ReadVehicleInfo,
             Permission::ReadVin,
+            // Upcoming Breaking Change: These following permissions will be removed
+            // in the next patch, as they are make-specific permissions
+            Permission::ReadCompass,
+            Permission::ReadSpeedeomter,
+            Permission::ReadThermometer,
         ])
     }
 }
@@ -283,4 +399,26 @@ fn test_getting_scope_url_params_string() {
 
     let expecting = "read_engine_oil read_fuel read_vin";
     assert_eq!(&permissions.query_value, expecting);
+}
+
+#[test]
+fn test_delete_connections_filter_both_options() {
+    let filter_with_both_options = DeleteConnectionsFilters {
+        vehicle_id: Some(String::from("vehicle_id")),
+        user_id: Some(String::from("user_id")),
+    };
+
+    let result = filter_with_both_options.validate();
+    assert!(result.is_err());
+}
+
+#[test]
+fn test_delete_connections_neither_option() {
+    let filter_with_neither_option = DeleteConnectionsFilters {
+        vehicle_id: None,
+        user_id: None,
+    };
+
+    let result = filter_with_neither_option.validate();
+    assert!(result.is_err());
 }

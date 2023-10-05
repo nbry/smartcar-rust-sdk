@@ -5,6 +5,7 @@ use smartcar::{
     get_vehicles,
     request::HttpVerb,
     vehicle::Vehicle,
+    DeleteConnectionsFilters,
     // CompatibilityOptions,
     ScopeBuilder,
 };
@@ -16,7 +17,7 @@ mod helpers;
 #[tokio::test]
 #[serial]
 async fn full_e2e_bev() -> Result<(), Box<dyn std::error::Error>> {
-    let (client_id, client_secret, redirect_uri) = get_creds_from_env();
+    let (client_id, client_secret, redirect_uri, amt) = get_creds_from_env();
     let scope = ScopeBuilder::with_all_permissions();
 
     // SET UP AUTH CLIENT
@@ -29,9 +30,41 @@ async fn full_e2e_bev() -> Result<(), Box<dyn std::error::Error>> {
     let (access, _) = ac.exchange_code(&code).await?;
     let access_token = &access.access_token;
 
+    // GET VEHICLES (and isolate one vehicle for testing)
     let (_, _) = get_user(&access).await?;
     let (vehicles, _) = get_vehicles(&access, None, None).await?;
     let v = Vehicle::new(&vehicles.vehicles[0], access_token);
+
+    // Method Calls
+    let attributes = v.attributes().await?;
+    println!("attributes: {:#?}", attributes);
+
+    let battery_capacity = v.battery_capacity().await?;
+    println!("battery_capacity: {:#?}", battery_capacity);
+
+    let battery_level = v.battery_level().await?;
+    println!("battery_level: {:#?}", battery_level);
+
+    let charge_limit = v.charge_limit().await?;
+    println!("charge_limit: {:#?}", charge_limit);
+
+    let charging_status = v.charging_status().await?;
+    println!("charging status: {:#?}", charging_status);
+
+    let fuel_tank = v.fuel_tank().await;
+    assert!(fuel_tank.is_err());
+
+    let location = v.location().await?;
+    println!("location: {:#?}", location);
+
+    let lock = v.lock().await?;
+    println!("lock: {:#?}", lock);
+
+    let lock_status = v.lock_status().await?;
+    println!("lock_status: {:#?}", lock_status);
+
+    let odometer = v.odometer().await?;
+    println!("odometer: {:#?}", odometer);
 
     let permissions = v.permissions().await?;
     println!("permissions: {:#?}", permissions);
@@ -39,47 +72,18 @@ async fn full_e2e_bev() -> Result<(), Box<dyn std::error::Error>> {
     let start_charge = v.start_charge().await?;
     println!("start_charge: {:#?}", start_charge);
 
-    let lock = v.lock().await?;
-    println!("lock: {:#?}", lock);
+    let tire_pressure = v.tire_pressure().await?;
+    println!("tire_pressure: {:#?}", tire_pressure);
 
     let vin = v.vin().await?;
     println!("vin: {:#?}", vin);
 
-    let attributes = v.attributes().await?;
-    println!("attributes: {:#?}", attributes);
-
-    let battery_capacity = v.battery_capacity().await?;
-    println!("battery capacity: {:#?}", battery_capacity);
-
-    let battery_level = v.battery_level().await?;
-    println!("battery level: {:#?}", battery_level);
-
-    let charging_status = v.charging_status().await?;
-    println!("charging status: {:#?}", charging_status);
-
-    let charge_limit = v.charge_limit().await?;
-    println!("charge limit: {:#?}", charge_limit);
-
-    let location = v.location().await?;
-    println!("location: {:#?}", location);
-
-    let odometer = v.odometer().await?;
-    println!("odometer: {:#?}", odometer);
-
-    let tire_pressure = v.tire_pressure().await?;
-    println!("tire pressure: {:#?}", tire_pressure);
-
-    let fuel_tank = v.fuel_tank().await;
-    assert!(fuel_tank.is_err());
-
-    let lock_status = v.lock_status().await?;
-    println!("lock_status: {:#?}", lock_status);
-
-    // Using general purpose request to get brand specific endpoint
-    let compass = v
+    // Make Specific Endpoint Test - With public `request` method
+    let (compass, _meta) = v
         .request("/tesla/compass", HttpVerb::Get, None, None)
-        .await;
-    println!("compass: {:#?}", compass);
+        .await?;
+    let compass_body = compass.text().await?;
+    println!("compass_body: {:#?}", compass_body);
 
     let batch = v
         .batch(vec![
@@ -90,15 +94,25 @@ async fn full_e2e_bev() -> Result<(), Box<dyn std::error::Error>> {
         .await?;
     println!("batch: {:#?}", batch);
 
+    // Compatibility
     // let compatibility_opts = CompatibilityOptions {
     //     client_id: Some(client_id),
     //     client_secret: Some(client_secret),
     //     flags: None,
     // };
-
     // let compatiblity =
     //     smartcar::get_compatibility(&vin.0.vin, &scope, "US", Some(compatibility_opts)).await?;
-    // println!("compatiblity: {:#?}", compatiblity);
+    // println!("compatibility: {:#?}", compatiblity);
+
+    // Vehicle Management
+    smartcar::get_connections(amt.as_str(), None, None).await?;
+    let delete_connections_filter = DeleteConnectionsFilters {
+        vehicle_id: Some(v.id),
+        user_id: None,
+    };
+    let delete_connections =
+        smartcar::delete_connections(amt.as_str(), Some(delete_connections_filter)).await?;
+    println!("delete_connections: {:#?}", delete_connections);
 
     Ok(())
 }
@@ -107,7 +121,7 @@ async fn full_e2e_bev() -> Result<(), Box<dyn std::error::Error>> {
 #[serial]
 async fn full_e2e_ice() -> Result<(), Box<dyn std::error::Error>> {
     println!("===================");
-    let (client_id, client_secret, redirect_uri) = get_creds_from_env();
+    let (client_id, client_secret, redirect_uri, _) = get_creds_from_env();
     let scope = ScopeBuilder::with_all_permissions();
 
     // SET UP AUTH CLIENT

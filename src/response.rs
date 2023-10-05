@@ -266,6 +266,47 @@ pub struct Compatibility {
     pub capabilities: Vec<Capability>,
 }
 
+#[derive(Debug, Deserialize, Serialize)]
+pub struct PagingCursor {
+    pub cursor: Option<String>,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct GetConnection {
+    pub user_id: String,
+    pub vehicle_id: String,
+    pub connected_at: String,
+    pub mode: String,
+}
+
+/// A paged list of all vehicles that are connected to the application associated with the
+/// management API token used, sorted in descending order by connection date.
+///
+/// This is the struct representation for the response body of
+/// **GET** `https://smartcar.com/docs/api-reference/management/get-vehicle-connections`
+#[derive(Debug, Deserialize, Serialize)]
+pub struct GetConnections {
+    pub connections: Vec<GetConnection>,
+    pub paging: PagingCursor,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct DeleteConnection {
+    pub user_id: String,
+    pub vehicle_id: String,
+}
+
+/// Deleted vehicle connections associated with a Smartcar user ID or a specific vehicle.
+///
+/// This is the struct representation for the response body of
+/// **DELETE** `https://smartcar.com/docs/api-reference/management/delete-vehicle-connections`
+#[derive(Debug, Deserialize, Serialize)]
+pub struct DeleteConnections {
+    pub connections: Vec<DeleteConnection>,
+}
+
 /// Smartcar headers from a response
 ///
 /// [More info on Smartcar Response Headers](https://smartcar.com/docs/api/#response-headers)
@@ -305,7 +346,6 @@ pub enum SmartcarResponseBody {
     // ReadClimate(),
     // ReadExtendedVehicleInfo(),
     // ControlClimate(),
-
 }
 
 /// Contains the response body AND metadata of a single endpoint in a batch request

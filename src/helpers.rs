@@ -9,15 +9,22 @@ pub(crate) fn get_api_url() -> String {
 
 pub(crate) fn get_oauth_url() -> String {
     match env::var("SMARTCAR_AUTH_ORIGIN") {
-        Ok(api_url) => api_url,
+        Ok(oauth_url) => oauth_url,
         Err(_) => String::from("https://auth.smartcar.com/oauth/token"),
     }
 }
 
 pub(crate) fn get_connect_url() -> String {
     match env::var("SMARTCAR_CONNECT_URL") {
-        Ok(api_url) => api_url,
+        Ok(connect_url) => connect_url,
         Err(_) => String::from("https://connect.smartcar.com"),
+    }
+}
+
+pub(crate) fn get_management_url() -> String {
+    match env::var("SMARTCAR_MANAGEMENT_API_ORIGIN") {
+        Ok(management_url) => management_url,
+        Err(_) => String::from("https://management.smartcar.com"),
     }
 }
 

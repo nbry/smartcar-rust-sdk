@@ -12,8 +12,8 @@ use crate::request::{get_bearer_token_header, HttpVerb, SmartcarRequestBuilder};
 use crate::response::batch::build_batch_request_body;
 use crate::response::{
     Action, ApplicationPermissions, Batch, BatteryCapacity, BatteryLevel, ChargeLimit,
-    ChargingStatus, EngineOilLife, FuelTank, Location, LockStatus, Meta, Odometer, Status, Subscribe,
-    TirePressure, VehicleAttributes, Vin,
+    ChargingStatus, EngineOilLife, FuelTank, Location, LockStatus, Meta, Odometer, Status,
+    Subscribe, TirePressure, VehicleAttributes, Vin,
 };
 
 #[derive(Debug)]

@@ -26,9 +26,9 @@ use std::{
     env,
 };
 
-use helpers::{format_flag_query, get_api_url};
+use helpers::{format_flag_query, get_api_url, get_management_url};
 use request::{get_bearer_token_header, HttpVerb, SmartcarRequestBuilder};
-use response::{Access, Compatibility, Meta, User, Vehicles};
+use response::{Access, Compatibility, DeleteConnections, GetConnections, Meta, User, Vehicles};
 
 pub mod auth_client;
 pub mod error;
@@ -147,6 +147,102 @@ pub async fn get_compatibility(
         .await?;
 
     let data = res.json::<Compatibility>().await?;
+
+    Ok((data, meta))
+}
+
+/// Options for get_connections
+pub struct GetConnectionsFilters {
+    pub vehicle_id: Option<String>,
+    pub user_id: Option<String>,
+}
+
+/// Paging options for get_connections
+pub struct GetConnectionsPaging {
+    pub cursor_id: Option<String>,
+    pub limit: Option<i32>,
+}
+
+/// Returns a paged list of all vehicles that are connected to the application
+/// associated with the management API token used, sorted in descending order by connection date.
+///
+/// More info on [get vehicle connections](https://smartcar.com/docs/api-reference/management/get-vehicle-connections)
+pub async fn get_connections(
+    amt: &str,
+    filter: Option<GetConnectionsFilters>,
+    paging: Option<GetConnectionsPaging>,
+) -> Result<(GetConnections, Meta), error::Error> {
+    let url = format!("{}/v2.0/management/connections/", get_management_url());
+    let mut req = SmartcarRequestBuilder::new(&url, HttpVerb::Get).add_header(
+        "Authorization",
+        &request::get_basic_b64_auth_header("default", &amt),
+    );
+    if let Some(filter) = filter {
+        if let Some(vehicle_id) = filter.vehicle_id {
+            req = req.add_query("vehicle_id", vehicle_id.as_str())
+        }
+        if let Some(user_id) = filter.user_id {
+            req = req.add_query("user_id", user_id.as_str())
+        }
+    }
+    if let Some(paging) = paging {
+        if let Some(cursor_id) = paging.cursor_id {
+            req = req.add_query("cursor_id", cursor_id.as_str())
+        }
+        if let Some(limit) = paging.limit {
+            req = req.add_query("limit", limit.to_string().as_str())
+        }
+    }
+    let (res, meta) = req.send().await?;
+    let data = res.json::<GetConnections>().await?;
+
+    Ok((data, meta))
+}
+
+pub struct DeleteConnectionsFilters {
+    pub vehicle_id: Option<String>,
+    pub user_id: Option<String>,
+}
+
+impl DeleteConnectionsFilters {
+    // Filter must have only one of vehicle_id OR user_id
+    fn validate(&self) -> Result<(), error::Error> {
+        if self.vehicle_id.is_some() && self.user_id.is_some() {
+            return Err(error::Error::DeleteConnectionsFilterValidationError);
+        }
+        if self.vehicle_id.is_none() && self.user_id.is_none() {
+            return Err(error::Error::DeleteConnectionsFilterValidationError);
+        }
+
+        Ok(())
+    }
+}
+
+/// Deletes all vehicle connections associated with a Smartcar user ID or a specific vehicle.
+///
+/// More info on [delete vehicle connections](https://smartcar.com/docs/api-reference/management/delete-vehicle-connections)
+pub async fn delete_connections(
+    amt: &str,
+    filter: Option<DeleteConnectionsFilters>,
+) -> Result<(DeleteConnections, Meta), error::Error> {
+    let url = format!("{}/v2.0/management/connections/", get_management_url());
+    let mut req = SmartcarRequestBuilder::new(&url, HttpVerb::Delete).add_header(
+        "Authorization",
+        &request::get_basic_b64_auth_header("default", &amt),
+    );
+    if let Some(filter) = filter {
+        if let Err(validation_error) = filter.validate() {
+            return Err(validation_error);
+        }
+        if let Some(vehicle_id) = filter.vehicle_id {
+            req = req.add_query("vehicle_id", vehicle_id.as_str())
+        }
+        if let Some(user_id) = filter.user_id {
+            req = req.add_query("user_id", user_id.as_str())
+        }
+    }
+    let (res, meta) = req.send().await?;
+    let data = res.json::<DeleteConnections>().await?;
 
     Ok((data, meta))
 }

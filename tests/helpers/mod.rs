@@ -89,15 +89,17 @@ pub(crate) async fn run_connect_flow(
     Ok(code.to_owned())
 }
 
-pub(crate) fn get_creds_from_env() -> (String, String, String) {
+pub(crate) fn get_creds_from_env() -> (String, String, String, String) {
     let client_id = std::env::var("E2E_SMARTCAR_CLIENT_ID")
         .expect("Need E2E_SMARTCAR_CLIENT_ID to run e2e tests");
 
     let client_secret = std::env::var("E2E_SMARTCAR_CLIENT_SECRET")
         .expect("Need E2E_SMARTCAR_CLIENT_SECRET to run e2e tests");
 
+    let amt = std::env::var("E2E_SMARTCAR_AMT").expect("Need E2E_SMARTCAR_AMT to run e2e tests");
+
     let redirect_uri = std::env::var("E2E_SMARTCAR_REDIRECT_URI")
         .expect("Need E2E_SMARTCAR_REDIRECT_URI to run e2e tests");
 
-    (client_id, client_secret, redirect_uri)
+    (client_id, client_secret, redirect_uri, amt)
 }

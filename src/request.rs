@@ -49,6 +49,7 @@ pub(crate) fn get_basic_b64_auth_header(client_id: &str, client_secret: &str) ->
 pub enum HttpVerb {
     Get,
     Post,
+    Put,
     Delete,
 }
 
@@ -65,6 +66,7 @@ impl SmartcarRequestBuilder {
             request: match verb {
                 HttpVerb::Get => client.get(url),
                 HttpVerb::Post => client.post(url),
+                HttpVerb::Put => client.put(url),
                 HttpVerb::Delete => client.delete(url),
             },
         }

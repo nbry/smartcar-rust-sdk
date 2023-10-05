@@ -36,7 +36,7 @@ pub(crate) trait MultiQuery {
 
 /// -> `Bearer <access_token>`
 pub(crate) fn get_bearer_token_header(access_token: &str) -> String {
-    format!("Bearer {}", access_token)
+    format!("Bearer {access_token}")
 }
 
 /// -> `Basic <base64('client_id:client_secrret')>`

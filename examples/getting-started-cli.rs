@@ -18,7 +18,7 @@
 //! 4. Run the example:
 //!
 //! ```
-//! cargo run --example=learn-by-cli
+//! cargo run --example=getting-started-cli
 //! ```
 
 use colored::{ColoredString, Colorize};
@@ -36,8 +36,14 @@ const DELAY: u64 = 300;
 async fn main() -> Result<(), error::Error> {
     let auth_client = AuthClient::from_env(true);
     let auth_url_options = AuthUrlOptionsBuilder::new().set_force_prompt(true);
-    let scope = ScopeBuilder::new()
-        .add_permissions([Permission::ReadVehicleInfo, Permission::ReadOdometer, Permission::ReadVin, Permission::ReadCharge,Permission::ReadBattery, Permission::ReadTires]);
+    let scope = ScopeBuilder::new().add_permissions([
+        Permission::ReadVehicleInfo,
+        Permission::ReadOdometer,
+        Permission::ReadVin,
+        Permission::ReadCharge,
+        Permission::ReadBattery,
+        Permission::ReadTires,
+    ]);
 
     // Generate URL for your user to go through Smartcar Connect
     // For this example, the user is you!

@@ -1,13 +1,10 @@
 use serial_test::serial;
 use smartcar::{
     auth_client::{AuthClient, AuthUrlOptionsBuilder},
-    get_user,
-    get_vehicles,
+    get_user, get_vehicles,
     request::HttpVerb,
     vehicle::Vehicle,
-    DeleteConnectionsFilters,
-    // CompatibilityOptions,
-    ScopeBuilder,
+    CompatibilityOptions, DeleteConnectionsFilters, Permission, ScopeBuilder,
 };
 
 use crate::helpers::{get_creds_from_env, run_connect_flow};
@@ -95,14 +92,18 @@ async fn full_e2e_bev() -> Result<(), Box<dyn std::error::Error>> {
     println!("batch: {:#?}", batch);
 
     // Compatibility
-    // let compatibility_opts = CompatibilityOptions {
-    //     client_id: Some(client_id),
-    //     client_secret: Some(client_secret),
-    //     flags: None,
-    // };
-    // let compatiblity =
-    //     smartcar::get_compatibility(&vin.0.vin, &scope, "US", Some(compatibility_opts)).await?;
-    // println!("compatibility: {:#?}", compatiblity);
+    let compatibility_opts = CompatibilityOptions {
+        client_id: Some(client_id),
+        client_secret: Some(client_secret),
+        flags: None,
+    };
+    let compatibility_scope = ScopeBuilder::new().add_permissions(vec![
+        Permission::ReadBattery,
+        Permission::ReadFuel,
+    ]);
+    let compatiblity =
+        smartcar::get_compatibility(&vin.0.vin, &compatibility_scope, "US", Some(compatibility_opts)).await?;
+    println!("compatibility: {:#?}", compatiblity);
 
     // Vehicle Management
     smartcar::get_connections(amt.as_str(), None, None).await?;

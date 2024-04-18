@@ -93,7 +93,7 @@ impl SmartcarRequestBuilder {
     }
 
     pub(crate) async fn send(self) -> Result<(Response, Meta), Error> {
-        let rust_version = rustc_version::version().expect("Failed to get Rust version");
+        let rust_version = env!("CARGO_PKG_RUSTC_VERSION");
         let system = System::new_all();
         let platform = system.get_platform();
         let user_agent = format!("Smartcar/{2.0}({system}); {platform} Rust v{rust_version}");

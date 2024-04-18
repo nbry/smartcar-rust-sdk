@@ -1,6 +1,7 @@
 use reqwest::{RequestBuilder, Response, StatusCode};
 use serde_json::Value;
 use std::collections::HashMap;
+use sysinfo::{System, SystemExt};
 
 use crate::{
     error::{Error, SmartcarError},
@@ -92,8 +93,13 @@ impl SmartcarRequestBuilder {
     }
 
     pub(crate) async fn send(self) -> Result<(Response, Meta), Error> {
-        let res = self.request.send().await?;
+        let rust_version = rustc_version::version().expect("Failed to get Rust version");
+        let system = System::new_all();
+        let platform = system.get_platform();
+        let user_agent = format!("Smartcar/{2.0}({system}); {platform} Rust v{rust_version}");
+        self.add_header("User-Agentgent", user_agent.as_str());
 
+        let res = self.request.send().await?;
         if res.status() != StatusCode::OK {
             let sc_err = res.json::<SmartcarError>().await?;
             return Err(Error::SmartcarError(Box::new(sc_err)));

@@ -282,7 +282,7 @@ impl Vehicle {
     ///
     /// [POST - Lock/Unlock Doors](https://smartcar.com/docs/api-reference/control-lock-unlock)
     pub async fn unlock(&self) -> Result<(Action, Meta), Error> {
-        let path = "/securiy";
+        let path = "/security";
         let req_body = json!({ "action": "UNLOCK"});
         let (res, meta) = self
             .get_request_builder(path, HttpVerb::Post)
